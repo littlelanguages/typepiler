@@ -6,10 +6,10 @@ A parser and type checker for a type compiler.
 ```
 Program = Seq<Declaration>;
 
-Declaration	= VariableDeclaration | FunctionDeclaration;
+Declaration = VariableDeclaration | FunctionDeclaration;
 
 VariableDeclaration :: VariableAccess * Identifier * LiteralExpression;
-FunctionDeclaration	:: Identifier * Seq<Identifier * Type> * Seq<Statement> * Opt<Type * Expression>;
+FunctionDeclaration :: Identifier * Seq<Identifier * Type> * Seq<Statement> * Opt<Type * Expression>;
 
 VariableAccess = {ReadOnly, ReadWrite};
 
@@ -22,7 +22,7 @@ BlockStatement :: Seq<Statement>;
 CallStatement :: Identifier * Seq<Expression>;
 EmptyStatement :: ;
 
-Expression	=	TernaryExpression | BinaryExpression | UnaryExpression | CallExpression | IdentifierReference | Parenthesis | LiteralValue;
+Expression = TernaryExpression | BinaryExpression | UnaryExpression | CallExpression | IdentifierReference | Parenthesis | LiteralValue;
 
 TernaryExpression :: Expression * Expression * Expression;
 BinaryExpression :: BinaryOp * Expression * Expression;
