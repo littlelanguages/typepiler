@@ -4,45 +4,121 @@ A parser and type checker for a type compiler.
 ## Example
 
 ```
-Program = Seq<Declaration>;
+Program ::
+  declarations: Seq<Declaration>;
 
-Declaration = VariableDeclaration | FunctionDeclaration;
+Declaration =
+  VariableDeclaration | FunctionDeclaration;
 
-VariableDeclaration :: VariableAccess * Identifier * LiteralExpression;
-FunctionDeclaration :: Identifier * Seq<Identifier * Type> * Seq<Statement> * Opt<Type * Expression>;
+VariableDeclaration ::
+  access: VariableAccess
+  identifier: Identifier
+  expression: LiteralExpression;
+
+FunctionDeclaration ::
+  identifier: Identifier
+  arguments: Seq<Identifier * Type>
+  statements: Seq<Statement>
+  suffix: Type * Expression;
 
 VariableAccess = {ReadOnly, ReadWrite};
 
-Statement = AssignmentStatement | IfThenElseStatement | WhileStatement | BlockStatement | CallStatement | EmptyStatement;
+Type =
+  {Int, Float, Bool};
 
-AssignmentStatement :: Opt<VariableAccess> * Identifier * Expression;
-IfThenElseStatement :: Expression * Statement * Opt<Statement>;
-WhileStatement :: Expression * Statement;
-BlockStatement :: Seq<Statement>;
-CallStatement :: Identifier * Seq<Expression>;
-EmptyStatement :: ;
+Statement =
+  AssignmentStatement | DeclarationStatement | IfThenElseStatement | WhileStatement |
+  BlockStatement | CallStatement | EmptyStatement;
 
-Expression = TernaryExpression | BinaryExpression | UnaryExpression | CallExpression | IdentifierReference | Parenthesis | LiteralValue;
+AssignmentStatement ::
+  identifier: Identifier
+  expression: Expression;
 
-TernaryExpression :: Expression * Expression * Expression;
-BinaryExpression :: BinaryOp * Expression * Expression;
-UnaryExpression :: Position * UnaryOp * Expression;
-CallExpression :: Identifier * Seq<Expression>;
-IdentifierReference :: Identifier;
-Parenthesis :: Position * Expression;
+DeclarationStatement ::
+  access: VariableAccess
+  identifier: Identifier
+  expression: Expression;
 
-LiteralExpression = LiteralValue | LiteralUnaryValue;
+IfThenElseStatement ::
+  expression: Expression
+  statement1: Statement
+  statement2: Statement;
 
-LiteralValue = LiteralBool | LiteralInt | LiteralFloat | LiteralString;
-LiteralBool :: Position * B;
-LiteralInt :: Position * S;
-LiteralFloat :: Position * S;
-LiteralString :: Position * S;
+WhileStatement ::
+  expression: Expression
+  statement: Statement;
 
-LiteralUnaryValue :: Position * UnaryOp * LiteralValue;
+BlockStatement ::
+  Seq<Statement>;
 
-BinaryOp = { Divide, Minus, Plus, Times, Equal, GreaterEqual, GreaterThan, LessEqual, LessThan, NotEqual, And, Or };
-UnaryOp = { UnaryNot, UnaryMinus, UnaryPlus };
+CallStatement ::
+  identifier: Identifier
+  expressions: Seq<Expression>;
 
-Identifier = Position * S;
+EmptyStatement ::
+  ;
+
+Expression =
+  TernaryExpression | BinaryExpression | UnaryExpression | CallExpression | Identifier |
+  ParenthesisExpression | LiteralValue;
+
+TernaryExpression ::
+  expression1: Expression
+  expression2: Expression
+  expression3: Expression;
+
+BinaryExpression ::
+  expression1: Expression
+  op: BinaryOp
+  expression2: Expression;
+
+UnaryExpression ::
+  op: UnaryOp
+  expression: Expression;
+
+CallExpression ::
+  identifier: Identifier
+  expressions: Seq<Expression>;
+
+ParenthesisExpression ::
+  location: Location
+  expression: Expression;
+
+LiteralExpression =
+  LiteralValue | LiteralUnaryValue;
+
+LiteralValue =
+  LiteralBool | LiteralInt | LiteralFloat | LiteralString;
+
+LiteralBool ::
+  location: Location
+  value: B;
+
+LiteralInt ::
+  location: Location
+  value: S;
+
+LiteralFloat ::
+  location: Location
+  value: S;
+
+LiteralString ::
+  location: Location
+  value: S;
+
+LiteralUnaryValue ::
+  location: Location
+  op: UnaryOp
+  value: LiteralValue;
+
+BinaryOp =
+  {Divide, Minus, Plus, Times, Equal, GreaterEqual, GreaterThan, LessEqual, LessThan,
+   NotEqual, And, Or};
+
+UnaryOp =
+  {UnaryNot, UnaryMinus, UnaryPlus};
+
+Identifier ::
+  location: Location
+  name: S;
 ```
