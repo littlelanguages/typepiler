@@ -1,0 +1,27 @@
+name: Test typepiler
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        deno-version: [1.4.6]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Use Deno Version ${{ matrix.deno-version }}
+        uses: denolib/setup-deno@v2
+        with:
+          deno-version: ${{ matrix.deno-version }}
+      - name: Build typepiler
+        run: .bin/build.sh
+      - name: Test typepiler
+        run: .bin/test.sh
