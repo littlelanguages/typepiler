@@ -1,0 +1,17 @@
+tokens
+    LowerID = lowerAlpha {alpha | digit};
+    UpperID = upperAlpha {alpha | digit};
+
+comments
+    "/*" to "*/" nested;
+    "//" {!cr};
+
+whitespace
+    chr(0)-' ';
+
+fragments
+    digit = '0'-'9';
+    lowerAlpha = 'a' - 'z';
+    upperAlpha = 'A'-'Z';
+    alpha = lowerAlpha + upperAlpha;
+    cr = chr(10);

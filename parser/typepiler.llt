@@ -1,0 +1,37 @@
+Declarations = Seq Declaration;
+
+Declaration = 
+  SetDeclaration | UnionDeclaration | SimpleComposite | RecordComposite;
+
+SetDeclaration ::
+    name: ID
+    elements: Seq ID;
+
+UnionDeclaration ::
+    name: ID
+    elements: Seq Type;
+
+SimpleComposite ::
+    name: ID
+    type: Type;
+
+RecordComposite ::
+    name: ID
+    fields: Seq (LowerID * Type);
+
+ID ::
+    location: Location
+    id: S;
+
+Type = 
+    Tuple | Reference | Parenthesis;
+
+Tuple :: Seq Type;
+
+Reference ::
+    name: ID
+    parameters: Seq Type;
+
+Parenthesis ::
+    location: Location
+    type: Type;

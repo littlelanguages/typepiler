@@ -1,0 +1,22 @@
+uses "./typepiler.llld";
+
+Declarations: {Declaration};
+
+Declaration: UpperID ("=" Alias | "::" Composite) ";";
+
+Alias
+  : Type {"|" Type} ";"
+  | "{" UpperID {"," UpperID} "}"
+  ;
+
+Composite
+  : TypeTerm
+  | {LowerID ":" Type}
+  ;
+
+Type: TypeTerm {"*" TypeTerm};
+
+TypeTerm
+  : UpperID {TypeTerm}
+  | "(" Type ")"
+  ;
