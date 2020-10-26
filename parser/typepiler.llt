@@ -17,7 +17,7 @@ SimpleComposite ::
 
 RecordComposite ::
     name: ID
-    fields: Seq (LowerID * Type);
+    fields: Seq (ID * Type);
 
 ID ::
     location: Location
