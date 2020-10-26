@@ -5,7 +5,7 @@ A parser and type checker for a type compiler.
 
 ```
 Program ::
-  declarations: Seq<Declaration>;
+  declarations: Seq Declaration;
 
 Declaration =
   VariableDeclaration | FunctionDeclaration;
@@ -17,8 +17,8 @@ VariableDeclaration ::
 
 FunctionDeclaration ::
   identifier: Identifier
-  arguments: Seq<Identifier * Type>
-  statements: Seq<Statement>
+  arguments: Seq (Identifier * Type)
+  statements: Seq Statement
   suffix: Type * Expression;
 
 VariableAccess = {ReadOnly, ReadWrite};
@@ -49,11 +49,11 @@ WhileStatement ::
   statement: Statement;
 
 BlockStatement ::
-  Seq<Statement>;
+  Seq Statement;
 
 CallStatement ::
   identifier: Identifier
-  expressions: Seq<Expression>;
+  expressions: Seq Expression;
 
 EmptyStatement ::
   ;
@@ -78,7 +78,7 @@ UnaryExpression ::
 
 CallExpression ::
   identifier: Identifier
-  expressions: Seq<Expression>;
+  expressions: Seq Expression;
 
 ParenthesisExpression ::
   location: Location
