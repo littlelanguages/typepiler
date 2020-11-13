@@ -5,7 +5,7 @@ Declarations: {Declaration};
 Declaration: UpperID ("=" Alias | "::" Composite) ";";
 
 Alias
-  : Type {"|" Type} ";"
+  : Type {"|" Type}
   | "{" UpperID {"," UpperID} "}"
   ;
 
