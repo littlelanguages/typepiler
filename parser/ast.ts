@@ -10,30 +10,30 @@ export type Declaration =
 
 export type SetDeclaration = {
   tag: "SetDeclaration";
-  name: ID;
-  elements: Array<ID>;
+  name: Name;
+  elements: Array<Name>;
 };
 
 export type UnionDeclaration = {
   tag: "UnionDeclaration";
-  name: ID;
+  name: Name;
   elements: Array<Type>;
 };
 
 export type SimpleComposite = {
   tag: "SimpleComposite";
-  name: ID;
+  name: Name;
   type: Type;
 };
 
 export type RecordComposite = {
   tag: "RecordComposite";
-  name: ID;
-  fields: Array<[ID, Type]>;
+  name: Name;
+  fields: Array<[Name, Type]>;
 };
 
-export type ID = {
-  tag: "ID";
+export type Name = {
+  tag: "Name";
   location: Location;
   id: string;
 };
@@ -47,7 +47,7 @@ export type Tuple = {
 
 export type Reference = {
   tag: "Reference";
-  name: ID;
+  name: Name;
   parameters: Array<Type>;
 };
 
