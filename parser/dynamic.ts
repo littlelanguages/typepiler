@@ -18,16 +18,6 @@ export const translateAST = (
   const declarations: TST.Declarations = [];
 
   const translateDeclaration = (d: AST.Declaration) => {
-    if (declarationNames.has(d.name.id)) {
-      errors.push(
-        {
-          tag: "DuplicateDefinitionError",
-          location: d.name.location,
-          name: d.name.id,
-        },
-      );
-    }
-
     if (d.tag === "SetDeclaration") {
       d.elements.forEach((n) => {
         if (setElements.has(n.id)) {
@@ -52,7 +42,20 @@ export const translateAST = (
     }
   };
 
-  ast.forEach((d) => translateDeclaration(d));
+  ast.forEach((d) => {
+    if (declarationNames.has(d.name.id)) {
+      errors.push(
+        {
+          tag: "DuplicateDefinitionError",
+          location: d.name.location,
+          name: d.name.id,
+        },
+      );
+    }
+    declarationNames.add(d.name.id);
+
+    translateDeclaration(d);
+  });
 
   return errors.length === 0 ? right(declarations) : left(errors);
 };
