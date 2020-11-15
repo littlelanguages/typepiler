@@ -29,7 +29,7 @@ Deno.test("dynamic - set declaration", () => {
   );
 });
 
-Deno.test("dynamic - duplicate element from same declaration", () => {
+Deno.test("dynamic - duplicate set element from same declaration", () => {
   assertEquals(
     translate("Boolean = {True, True};"),
     left([
@@ -42,7 +42,7 @@ Deno.test("dynamic - duplicate element from same declaration", () => {
   );
 });
 
-Deno.test("dynamic - duplicate element from alternative declaration", () => {
+Deno.test("dynamic - duplicate set element from alternative declaration", () => {
   assertEquals(
     translate(
       "Boolean = {True, False};\nTroolean = {True, TriFalse, TriDunno};",
