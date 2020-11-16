@@ -7,7 +7,8 @@ export type ErrorItem =
   | SyntaxError
   | DuplicateDefinitionError
   | DuplicateSetElementError
-  | UnknownTypeError;
+  | UnknownTypeError
+  | IncorrectTypeArityError;
 
 export type DuplicateDefinitionError = {
   tag: "DuplicateDefinitionError";
@@ -25,4 +26,12 @@ export type UnknownTypeError = {
   tag: "UnknownTypeError";
   location: Location;
   name: string;
+};
+
+export type IncorrectTypeArityError = {
+  tag: "IncorrectTypeArityError";
+  location: Location;
+  name: string;
+  expected: number;
+  actual: number;
 };

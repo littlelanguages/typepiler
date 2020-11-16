@@ -97,6 +97,18 @@ export const translateAST = (
           name: type.name.id,
         });
         return typeShell;
+      } else if (
+        d.tag === "InternalDeclaration" && d.arity !== type.parameters.length
+      ) {
+        errors.push({
+          tag: "IncorrectTypeArityError",
+          location: type.name.location,
+          name: type.name.id,
+          expected: d.arity,
+          actual: type.parameters.length,
+        });
+
+        return typeShell;
       } else {
         return {
           tag: "Reference",

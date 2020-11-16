@@ -96,6 +96,30 @@ Deno.test("dynamic - alias refers to unknown type", () => {
   );
 });
 
+Deno.test("dynamic - validate number of type parameters", () => {
+  assertEquals(
+    translate(
+      "T1 = Seq;\nT2 = Seq (String) String;\nT3 = Map (String) String;\nT4 = Set String;",
+    ),
+    left([
+      {
+        tag: "IncorrectTypeArityError",
+        location: range(5, 1, 6, 7, 1, 8),
+        name: "Seq",
+        expected: 1,
+        actual: 0,
+      },
+      {
+        tag: "IncorrectTypeArityError",
+        location: range(15, 2, 6, 17, 2, 8),
+        name: "Seq",
+        expected: 1,
+        actual: 2,
+      },
+    ]),
+  );
+});
+
 const mkReference = (
   declaration: Declaration,
   parameters: Array<Type> = [],
