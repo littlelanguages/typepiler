@@ -1,3 +1,10 @@
+import {
+  builtinDeclarations,
+  Declaration,
+  InternalDeclaration,
+  Reference,
+  Type,
+} from "../cfg/definition.ts";
 import { left, right } from "../data/either.ts";
 import { assertEquals } from "../testing/asserts.ts";
 import { translate } from "./dynamic.ts";
@@ -56,3 +63,39 @@ Deno.test("dynamic - duplicate set element from alternative declaration", () => 
     ]),
   );
 });
+
+Deno.test("dynamic - alias", () => {
+  assertEquals(
+    translate("Fred = Seq (String * Set String);"),
+    right([
+      {
+        tag: "AliasDeclaration",
+        name: "Fred",
+        type: builtInReference("Seq", [{
+          tag: "Tuple",
+          value: [
+            builtInReference("String"),
+            builtInReference("Set", [builtInReference("String")]),
+          ],
+        }]),
+      },
+    ]),
+  );
+});
+
+const mkReference = (
+  declaration: Declaration,
+  parameters: Array<Type> = [],
+): Reference => ({
+  tag: "Reference",
+  declaration,
+  parameters,
+});
+
+const builtIn = (name: string): InternalDeclaration =>
+  builtinDeclarations.find((d) => d.name === name)!;
+
+const builtInReference = (
+  name: string,
+  parameters: Array<Type> = [],
+): Reference => mkReference(builtIn(name), parameters);
