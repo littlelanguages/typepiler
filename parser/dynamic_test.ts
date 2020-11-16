@@ -83,6 +83,19 @@ Deno.test("dynamic - alias", () => {
   );
 });
 
+Deno.test("dynamic - alias refers to unknown type", () => {
+  assertEquals(
+    translate("Fred = Seq (String * Sets String);"),
+    left([
+      {
+        tag: "UnknownTypeError",
+        location: range(21, 1, 22, 24, 1, 25),
+        name: "Sets",
+      },
+    ]),
+  );
+});
+
 const mkReference = (
   declaration: Declaration,
   parameters: Array<Type> = [],

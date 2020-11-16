@@ -32,7 +32,7 @@ export const translateAST = (
       declarations.push({
         tag: "AliasDeclaration",
         name: d.name.id,
-        type: { tag: "Tuple", value: [] },
+        type: typeShell,
       });
     } else if (d.tag === "UnionDeclaration") {
       declarations.push({
@@ -70,7 +70,7 @@ export const translateAST = (
     }
   };
 
-  const getDeclaration = (name: string): TST.Declaration => {
+  const getDeclaration = (name: string): TST.Declaration | undefined => {
     let declaration: TST.Declaration | undefined = TST.builtinDeclarations.find(
       (d) => d.name === name,
     );
@@ -79,23 +79,33 @@ export const translateAST = (
       declaration = declarations.find((d) => d.name === name);
     }
 
-    if (declaration === undefined) {
-      throw `Unknown declaration: ${name}`;
-    } else {
-      return declaration;
-    }
+    return declaration;
   };
 
-  const translateType = (type: AST.Type): TST.Type =>
-    type.tag === "Tuple"
-      ? { tag: "Tuple", value: type.value.map(translateType) }
-      : type.tag === "Parenthesis"
-      ? translateType(type.type)
-      : {
-        tag: "Reference",
-        declaration: getDeclaration(type.name.id),
-        parameters: type.parameters.map(translateType),
-      };
+  const translateType = (type: AST.Type): TST.Type => {
+    if (type.tag === "Tuple") {
+      return { tag: "Tuple", value: type.value.map(translateType) };
+    } else if (type.tag === "Parenthesis") {
+      return translateType(type.type);
+    } else {
+      const d = getDeclaration(type.name.id);
+
+      if (d === undefined) {
+        errors.push({
+          tag: "UnknownTypeError",
+          location: type.name.location,
+          name: type.name.id,
+        });
+        return typeShell;
+      } else {
+        return {
+          tag: "Reference",
+          declaration: d,
+          parameters: type.parameters.map(translateType),
+        };
+      }
+    }
+  };
 
   ast.forEach((d) => {
     if (declarationNames.has(d.name.id)) {
@@ -115,4 +125,5 @@ export const translateAST = (
 
   return errors.length === 0 ? right(declarations) : left(errors);
 };
-Í
+
+const typeShell: TST.Type = { tag: "Tuple", value: [] };

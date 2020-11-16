@@ -6,7 +6,8 @@ export type Errors = Array<ErrorItem>;
 export type ErrorItem =
   | SyntaxError
   | DuplicateDefinitionError
-  | DuplicateSetElementError;
+  | DuplicateSetElementError
+  | UnknownTypeError;
 
 export type DuplicateDefinitionError = {
   tag: "DuplicateDefinitionError";
@@ -16,6 +17,12 @@ export type DuplicateDefinitionError = {
 
 export type DuplicateSetElementError = {
   tag: "DuplicateSetElementError";
+  location: Location;
+  name: string;
+};
+
+export type UnknownTypeError = {
+  tag: "UnknownTypeError";
   location: Location;
   name: string;
 };
