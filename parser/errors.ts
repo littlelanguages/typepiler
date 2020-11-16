@@ -4,11 +4,11 @@ import type { SyntaxError } from "./typepiler-parser.ts";
 export type Errors = Array<ErrorItem>;
 
 export type ErrorItem =
-  | SyntaxError
   | DuplicateDefinitionError
   | DuplicateSetElementError
-  | UnknownTypeError
-  | IncorrectTypeArityError;
+  | IncorrectTypeArityError
+  | SyntaxError
+  | UnknownTypeError;
 
 export type DuplicateDefinitionError = {
   tag: "DuplicateDefinitionError";
@@ -22,16 +22,16 @@ export type DuplicateSetElementError = {
   name: string;
 };
 
-export type UnknownTypeError = {
-  tag: "UnknownTypeError";
-  location: Location;
-  name: string;
-};
-
 export type IncorrectTypeArityError = {
   tag: "IncorrectTypeArityError";
   location: Location;
   name: string;
   expected: number;
   actual: number;
+};
+
+export type UnknownTypeError = {
+  tag: "UnknownTypeError";
+  location: Location;
+  name: string;
 };
