@@ -83,7 +83,7 @@ Deno.test("dynamic - alias", () => {
   );
 });
 
-Deno.test("dynamic - alias refers to unknown type", () => {
+Deno.test("dynamic - reference to unknown type", () => {
   assertEquals(
     translate("Fred = Seq (String * Sets String);"),
     left([
