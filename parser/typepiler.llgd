@@ -17,6 +17,11 @@ Composite
 Type: TypeTerm {"*" TypeTerm};
 
 TypeTerm
-  : UpperID {TypeTerm}
+  : UpperID {TypeFactor}
+  | "(" Type ")"
+  ;
+
+TypeFactor
+  : UpperID
   | "(" Type ")"
   ;

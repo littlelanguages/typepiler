@@ -14,6 +14,7 @@ const visitor: Parser.Visitor<
   (id: Name) => Declaration,
   (id: Name) => Declaration,
   Type,
+  Type,
   Type
 > = {
   visitDeclarations: (a: Array<Declaration>): Declarations => a,
@@ -69,6 +70,17 @@ const visitor: Parser.Visitor<
     parameters: a2,
   }),
   visitTypeTerm2: (a1: Token, a2: Type, a3: Token): Type => ({
+    tag: "Parenthesis",
+    location: combine(a1[1], a3[1]),
+    type: a2,
+  }),
+
+  visitTypeFactor1: (a: Token): Type => ({
+    tag: "Reference",
+    name: mkName(a),
+    parameters: [],
+  }),
+  visitTypeFactor2: (a1: Token, a2: Type, a3: Token): Type => ({
     tag: "Parenthesis",
     location: combine(a1[1], a3[1]),
     type: a2,

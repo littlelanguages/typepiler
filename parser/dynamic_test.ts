@@ -99,7 +99,7 @@ Deno.test("dynamic - alias refers to unknown type", () => {
 Deno.test("dynamic - validate number of type parameters", () => {
   assertEquals(
     translate(
-      "T1 = Seq;\nT2 = Seq (String) String;\nT3 = Map (String) String;\nT4 = Set String;",
+      "T1 = Seq;\nT2 = Seq String String;\nT3 = Map String String;\nT4 = Set String;",
     ),
     left([
       {
