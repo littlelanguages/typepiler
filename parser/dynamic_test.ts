@@ -64,7 +64,7 @@ Deno.test("dynamic - duplicate set element from alternative declaration", () => 
   );
 });
 
-Deno.test("dynamic - alias", () => {
+Deno.test("dynamic - alias declaration", () => {
   assertEquals(
     translate("Fred = Seq (String * Set String);"),
     right([
