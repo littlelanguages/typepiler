@@ -46,6 +46,12 @@ export const translateAST = (
         name: d.name.id,
         type: typeShell,
       });
+    } else if (d.tag === "RecordComposite") {
+      declarations.push({
+        tag: "RecordComposite",
+        name: d.name.id,
+        fields: [],
+      });
     }
 
     declarationNames.add(d.name.id);
@@ -77,6 +83,10 @@ export const translateAST = (
       const tst = getDeclaration(d.name.id) as TST.SimpleComposite;
 
       tst.type = translateType(d.type);
+    } else if (d.tag === "RecordComposite") {
+      const tst = getDeclaration(d.name.id) as TST.RecordComposite;
+
+      tst.fields = d.fields.map(([n, t]) => [n.id, translateType(t)]);
     }
   };
 

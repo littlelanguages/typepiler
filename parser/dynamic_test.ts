@@ -3,6 +3,7 @@ import {
   Declaration,
   InternalDeclaration,
   Reference,
+  Tuple,
   Type,
 } from "../cfg/definition.ts";
 import { left, right } from "../data/either.ts";
@@ -71,13 +72,15 @@ Deno.test("dynamic - alias declaration", () => {
       {
         tag: "AliasDeclaration",
         name: "Fred",
-        type: builtInReference("Seq", [{
-          tag: "Tuple",
-          value: [
-            builtInReference("String"),
-            builtInReference("Set", [builtInReference("String")]),
-          ],
-        }]),
+        type: builtInReference(
+          "Seq",
+          [mkTuple(
+            [
+              builtInReference("String"),
+              builtInReference("Set", [builtInReference("String")]),
+            ],
+          )],
+        ),
       },
     ]),
   );
@@ -129,13 +132,33 @@ Deno.test("dynamic - simple composite", () => {
       {
         tag: "SimpleComposite",
         name: "Fred",
-        type: {
-          tag: "Tuple",
-          value: [builtInReference("String"), builtInReference("U8")],
-        },
+        type: mkTuple([builtInReference("String"), builtInReference("U8")]),
       },
     ]),
   );
+});
+
+Deno.test("dynamic - record composite", () => {
+  assertEquals(
+    translate(
+      "Fred :: a : String * U8 b: F32;",
+    ),
+    right([
+      {
+        tag: "RecordComposite",
+        name: "Fred",
+        fields: [
+          ["a", mkTuple([builtInReference("String"), builtInReference("U8")])],
+          ["b", builtInReference("F32")],
+        ],
+      },
+    ]),
+  );
+});
+
+const mkTuple = (value: Array<Type>): Tuple => ({
+  tag: "Tuple",
+  value: value,
 });
 
 const mkReference = (
