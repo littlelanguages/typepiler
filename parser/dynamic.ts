@@ -40,6 +40,12 @@ export const translateAST = (
         name: d.name.id,
         elements: [],
       });
+    } else if (d.tag === "SimpleComposite") {
+      declarations.push({
+        tag: "SimpleComposite",
+        name: d.name.id,
+        type: typeShell,
+      });
     }
 
     declarationNames.add(d.name.id);
@@ -67,6 +73,10 @@ export const translateAST = (
       const tst = getDeclaration(d.name.id) as TST.AliasDeclaration;
 
       tst.type = translateType(d.elements[0]);
+    } else if (d.tag === "SimpleComposite") {
+      const tst = getDeclaration(d.name.id) as TST.SimpleComposite;
+
+      tst.type = translateType(d.type);
     }
   };
 

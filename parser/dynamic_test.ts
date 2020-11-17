@@ -120,6 +120,24 @@ Deno.test("dynamic - validate number of type parameters", () => {
   );
 });
 
+Deno.test("dynamic - simple composite", () => {
+  assertEquals(
+    translate(
+      "Fred :: String * U8;",
+    ),
+    right([
+      {
+        tag: "SimpleComposite",
+        name: "Fred",
+        type: {
+          tag: "Tuple",
+          value: [builtInReference("String"), builtInReference("U8")],
+        },
+      },
+    ]),
+  );
+});
+
 const mkReference = (
   declaration: Declaration,
   parameters: Array<Type> = [],
