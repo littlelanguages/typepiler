@@ -10,7 +10,7 @@ Alias
   ;
 
 Composite
-  : TypeTerm
+  : Type
   | {LowerID ":" Type}
   ;
 
