@@ -46,7 +46,7 @@ export const translateAST = (
         name: d.name.id,
         type: typeShell,
       });
-    } else if (d.tag === "RecordComposite") {
+    } else {
       declarations.push({
         tag: "RecordComposite",
         name: d.name.id,
@@ -79,6 +79,30 @@ export const translateAST = (
       const tst = getDeclaration(d.name.id) as TST.AliasDeclaration;
 
       tst.type = translateType(d.elements[0]);
+    } else if (d.tag === "UnionDeclaration") {
+      const tst = getDeclaration(d.name.id) as TST.UnionDeclaration;
+
+      d.elements.forEach((t) => {
+        if (t.tag === "Reference") {
+          const declaration = getDeclaration(t.name.id);
+
+          if (declaration === undefined) {
+            throw `TODO - undefined - ${t.name.id} - ${
+              JSON.stringify(declarations, null, 2)
+            }`;
+          } else if (declaration.tag === "InternalDeclaration") {
+            throw `TODO - ${declaration}`;
+          } else if (declaration.tag === "AliasDeclaration") {
+            throw `TODO - ${declaration}`;
+          } else if (declaration.tag === "SetDeclaration") {
+            throw `TODO - ${declaration}`;
+          } else {
+            tst.elements.push(declaration);
+          }
+        } else {
+          throw `TODO - ${t}`;
+        }
+      });
     } else if (d.tag === "SimpleComposite") {
       const tst = getDeclaration(d.name.id) as TST.SimpleComposite;
 
@@ -166,9 +190,9 @@ export const translateAST = (
     } else {
       populateShellDeclaration(d);
     }
-
-    translateDeclaration(d);
   });
+
+  ast.forEach(translateDeclaration);
 
   return errors.length === 0 ? right(declarations) : left(errors);
 };

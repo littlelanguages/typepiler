@@ -5,6 +5,7 @@ import {
   Reference,
   Tuple,
   Type,
+  UnionDeclaration,
 } from "../cfg/definition.ts";
 import { left, right } from "../data/either.ts";
 import { assertEquals } from "../testing/asserts.ts";
@@ -161,6 +162,38 @@ Deno.test("dynamic - record composite field names need to be unique", () => {
         location: mkCoordinate(24, 1, 25),
         name: "a",
       },
+    ]),
+  );
+});
+
+Deno.test("dynamic - union declaration", () => {
+  const d1 = {
+    tag: "SimpleComposite",
+    name: "SetDeclaration",
+    type: builtInReference("String"),
+  };
+  const d2 = {
+    tag: "RecordComposite",
+    name: "UnionDeclaration",
+    fields: [
+      ["v1", builtInReference("U32")],
+      ["v2", builtInReference("S32")],
+    ],
+  };
+
+  assertEquals(
+    translate(
+      "Declaration = SetDeclaration | UnionDeclaration;\n" +
+        "SetDeclaration :: String;\nUnionDeclaration :: v1 : U32 v2 : S32;\n",
+    ),
+    right([
+      {
+        tag: "UnionDeclaration",
+        name: "Declaration",
+        elements: [d1, d2],
+      },
+      d1,
+      d2,
     ]),
   );
 });

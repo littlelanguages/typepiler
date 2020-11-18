@@ -21,7 +21,7 @@ RecordComposite ::
 
 ID ::
     location: Location
-    id: S;
+    id: String;
 
 Type = 
     Tuple | Reference | Parenthesis;
