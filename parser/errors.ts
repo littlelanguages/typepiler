@@ -9,7 +9,7 @@ export type ErrorItem =
   | DuplicateSetElementError
   | IncorrectTypeArityError
   | SyntaxError
-  | UnknownTypeError;
+  | UnknownDeclarationError;
 
 export type DuplicateDefinitionError = {
   tag: "DuplicateDefinitionError";
@@ -37,8 +37,8 @@ export type IncorrectTypeArityError = {
   actual: number;
 };
 
-export type UnknownTypeError = {
-  tag: "UnknownTypeError";
+export type UnknownDeclarationError = {
+  tag: "UnknownDeclarationError";
   location: Location;
   name: string;
 };

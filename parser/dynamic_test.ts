@@ -87,12 +87,12 @@ Deno.test("dynamic - alias declaration", () => {
   );
 });
 
-Deno.test("dynamic - reference to unknown type", () => {
+Deno.test("dynamic - reference to unknown declaration", () => {
   assertEquals(
     translate("Fred = Seq (String * Sets String);"),
     left([
       {
-        tag: "UnknownTypeError",
+        tag: "UnknownDeclarationError",
         location: range(21, 1, 22, 24, 1, 25),
         name: "Sets",
       },
@@ -206,7 +206,7 @@ Deno.test("dynamic - union declaration referencing unknown declaration", () => {
     ),
     left([
       {
-        tag: "UnknownTypeError",
+        tag: "UnknownDeclarationError",
         location: range(31, 1, 32, 47, 1, 48),
         name: "UnionDeclarations",
       },

@@ -88,7 +88,7 @@ export const translateAST = (
 
           if (declaration === undefined) {
             errors.push({
-              tag: "UnknownTypeError",
+              tag: "UnknownDeclarationError",
               location: t.name.location,
               name: t.name.id,
             });
@@ -153,7 +153,7 @@ export const translateAST = (
 
       if (d === undefined) {
         errors.push({
-          tag: "UnknownTypeError",
+          tag: "UnknownDeclarationError",
           location: type.name.location,
           name: type.name.id,
         });
