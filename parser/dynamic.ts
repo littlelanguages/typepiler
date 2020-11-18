@@ -84,6 +84,21 @@ export const translateAST = (
 
       tst.type = translateType(d.type);
     } else if (d.tag === "RecordComposite") {
+      const fieldNames = new Set();
+
+      d.fields.forEach(([n, _]) => {
+        if (fieldNames.has(n.id)) {
+          errors.push(
+            {
+              tag: "DuplicateFieldNameError",
+              location: n.location,
+              name: n.id,
+            },
+          );
+        }
+        fieldNames.add(n.id);
+      });
+
       const tst = getDeclaration(d.name.id) as TST.RecordComposite;
 
       tst.fields = d.fields.map(([n, t]) => [n.id, translateType(t)]);

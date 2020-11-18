@@ -9,7 +9,7 @@ import {
 import { left, right } from "../data/either.ts";
 import { assertEquals } from "../testing/asserts.ts";
 import { translate } from "./dynamic.ts";
-import { range } from "./location.ts";
+import { mkCoordinate, range } from "./location.ts";
 
 Deno.test("dynamic - empty declaration", () => {
   assertEquals(translate(""), right([]));
@@ -125,9 +125,7 @@ Deno.test("dynamic - validate number of type parameters", () => {
 
 Deno.test("dynamic - simple composite", () => {
   assertEquals(
-    translate(
-      "Fred :: String * U8;",
-    ),
+    translate("Fred :: String * U8;"),
     right([
       {
         tag: "SimpleComposite",
@@ -140,9 +138,7 @@ Deno.test("dynamic - simple composite", () => {
 
 Deno.test("dynamic - record composite", () => {
   assertEquals(
-    translate(
-      "Fred :: a : String * U8 b: F32;",
-    ),
+    translate("Fred :: a : String * U8 b: F32;"),
     right([
       {
         tag: "RecordComposite",
@@ -151,6 +147,19 @@ Deno.test("dynamic - record composite", () => {
           ["a", mkTuple([builtInReference("String"), builtInReference("U8")])],
           ["b", builtInReference("F32")],
         ],
+      },
+    ]),
+  );
+});
+
+Deno.test("dynamic - record composite field names need to be unique", () => {
+  assertEquals(
+    translate("Fred :: a : String * U8 a: F32;"),
+    left([
+      {
+        tag: "DuplicateFieldNameError",
+        location: mkCoordinate(24, 1, 25),
+        name: "a",
       },
     ]),
   );

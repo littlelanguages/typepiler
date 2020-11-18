@@ -5,6 +5,7 @@ export type Errors = Array<ErrorItem>;
 
 export type ErrorItem =
   | DuplicateDefinitionError
+  | DuplicateFieldNameError
   | DuplicateSetElementError
   | IncorrectTypeArityError
   | SyntaxError
@@ -12,6 +13,12 @@ export type ErrorItem =
 
 export type DuplicateDefinitionError = {
   tag: "DuplicateDefinitionError";
+  location: Location;
+  name: string;
+};
+
+export type DuplicateFieldNameError = {
+  tag: "DuplicateFieldNameError";
   location: Location;
   name: string;
 };
