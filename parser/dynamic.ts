@@ -87,9 +87,11 @@ export const translateAST = (
           const declaration = getDeclaration(t.name.id);
 
           if (declaration === undefined) {
-            throw `TODO - undefined - ${t.name.id} - ${
-              JSON.stringify(declarations, null, 2)
-            }`;
+            errors.push({
+              tag: "UnknownTypeError",
+              location: t.name.location,
+              name: t.name.id,
+            });
           } else if (declaration.tag === "InternalDeclaration") {
             throw `TODO - ${declaration}`;
           } else if (declaration.tag === "AliasDeclaration") {

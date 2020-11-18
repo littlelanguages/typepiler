@@ -198,6 +198,22 @@ Deno.test("dynamic - union declaration", () => {
   );
 });
 
+Deno.test("dynamic - union declaration referencing unknown declaration", () => {
+  assertEquals(
+    translate(
+      "Declaration = SetDeclaration | UnionDeclarations;\n" +
+        "SetDeclaration :: String;\nUnionDeclaration :: v1 : U32 v2 : S32;\n",
+    ),
+    left([
+      {
+        tag: "UnknownTypeError",
+        location: range(31, 1, 32, 47, 1, 48),
+        name: "UnionDeclarations",
+      },
+    ]),
+  );
+});
+
 const mkTuple = (value: Array<Type>): Tuple => ({
   tag: "Tuple",
   value: value,
