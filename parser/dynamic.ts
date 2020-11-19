@@ -100,7 +100,12 @@ export const translateAST = (
               reference: t.name.id,
             });
           } else if (declaration.tag === "AliasDeclaration") {
-            throw `TODO - ${declaration}`;
+            errors.push({
+              tag: "UnionDeclarationReferenceAliasDeclarationError",
+              location: t.name.location,
+              name: d.name.id,
+              reference: t.name.id,
+            });
           } else if (declaration.tag === "SetDeclaration") {
             throw `TODO - ${declaration}`;
           } else {
