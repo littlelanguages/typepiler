@@ -107,7 +107,12 @@ export const translateAST = (
               reference: t.name.id,
             });
           } else if (declaration.tag === "SetDeclaration") {
-            throw `TODO - ${declaration}`;
+            errors.push({
+              tag: "UnionDeclarationReferenceSetDeclarationError",
+              location: t.name.location,
+              name: d.name.id,
+              reference: t.name.id,
+            });
           } else {
             tst.elements.push(declaration);
           }

@@ -235,11 +235,11 @@ Deno.test("dynamic - union declaration references alias declaration", () => {
   assertEquals(
     translate(
       "Declaration = SetDeclaration | Fred;\n" +
-        "SetDeclaration :: String;\nFred = U32 * String;",
+        "SetDeclaration :: String;\nFred = {A, B, C, D};",
     ),
     left([
       {
-        tag: "UnionDeclarationReferenceAliasDeclarationError",
+        tag: "UnionDeclarationReferenceSetDeclarationError",
         location: range(31, 1, 32, 34, 1, 35),
         name: "Declaration",
         reference: "Fred",

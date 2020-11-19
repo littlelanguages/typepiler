@@ -11,6 +11,7 @@ export type ErrorItem =
   | SyntaxError
   | UnionDeclarationReferenceAliasDeclarationError
   | UnionDeclarationReferenceInteranlDeclarationError
+  | UnionDeclarationReferenceSetDeclarationError
   | UnknownDeclarationError;
 
 export type DuplicateDefinitionError = {
@@ -48,6 +49,13 @@ export type UnionDeclarationReferenceAliasDeclarationError = {
 
 export type UnionDeclarationReferenceInteranlDeclarationError = {
   tag: "UnionDeclarationReferenceInteranlDeclarationError";
+  location: Location;
+  name: string;
+  reference: string;
+};
+
+export type UnionDeclarationReferenceSetDeclarationError = {
+  tag: "UnionDeclarationReferenceSetDeclarationError";
   location: Location;
   name: string;
   reference: string;
