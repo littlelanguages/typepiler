@@ -248,6 +248,25 @@ Deno.test("dynamic - union declaration references alias declaration", () => {
   );
 });
 
+Deno.test("dynamic - union declaration references compound type", () => {
+  assertEquals(
+    translate(
+      "Declaration = (SetDeclaration) | UnionDeclaration * UnionDeclaration;\n" +
+        "SetDeclaration :: String;\nUnionDeclaration :: v1 : U32 v2 : S32;\n",
+    ),
+    left([
+      {
+        tag: "UnionDeclarationReferenceCompundTypeError",
+        location: range(14, 1, 15, 29, 1, 30),
+      },
+      {
+        tag: "UnionDeclarationReferenceCompundTypeError",
+        location: range(33, 1, 34, 67, 1, 68),
+      },
+    ]),
+  );
+});
+
 const mkTuple = (value: Array<Type>): Tuple => ({
   tag: "Tuple",
   value: value,

@@ -10,6 +10,7 @@ export type ErrorItem =
   | IncorrectTypeArityError
   | SyntaxError
   | UnionDeclarationReferenceAliasDeclarationError
+  | UnionDeclarationReferenceCompundTypeError
   | UnionDeclarationReferenceInteranlDeclarationError
   | UnionDeclarationReferenceSetDeclarationError
   | UnknownDeclarationError;
@@ -45,6 +46,11 @@ export type UnionDeclarationReferenceAliasDeclarationError = {
   location: Location;
   name: string;
   reference: string;
+};
+
+export type UnionDeclarationReferenceCompundTypeError = {
+  tag: "UnionDeclarationReferenceCompundTypeError";
+  location: Location;
 };
 
 export type UnionDeclarationReferenceInteranlDeclarationError = {

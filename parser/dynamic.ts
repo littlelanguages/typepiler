@@ -117,7 +117,10 @@ export const translateAST = (
             tst.elements.push(declaration);
           }
         } else {
-          throw `TODO - ${t}`;
+          errors.push({
+            tag: "UnionDeclarationReferenceCompundTypeError",
+            location: AST.typeLocation(t),
+          });
         }
       });
     } else if (d.tag === "SimpleComposite") {

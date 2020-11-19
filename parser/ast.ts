@@ -1,4 +1,4 @@
-import { Location } from "./location.ts";
+import { combine, Location } from "./location.ts";
 
 export type Declarations = Array<Declaration>;
 
@@ -56,3 +56,13 @@ export type Parenthesis = {
   location: Location;
   type: Type;
 };
+
+export const typeLocation = (type: Type): Location =>
+  type.tag === "Reference"
+    ? type.name.location
+    : type.tag === "Parenthesis"
+    ? type.location
+    : combine(
+      typeLocation(type.value[0]),
+      typeLocation(type.value[type.value.length - 1]),
+    );
