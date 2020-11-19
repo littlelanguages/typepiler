@@ -9,6 +9,7 @@ export type ErrorItem =
   | DuplicateSetElementError
   | IncorrectTypeArityError
   | SyntaxError
+  | UnionDeclarationReferenceInteranlDeclarationError
   | UnknownDeclarationError;
 
 export type DuplicateDefinitionError = {
@@ -35,6 +36,13 @@ export type IncorrectTypeArityError = {
   name: string;
   expected: number;
   actual: number;
+};
+
+export type UnionDeclarationReferenceInteranlDeclarationError = {
+  tag: "UnionDeclarationReferenceInteranlDeclarationError";
+  location: Location;
+  name: string;
+  reference: string;
 };
 
 export type UnknownDeclarationError = {

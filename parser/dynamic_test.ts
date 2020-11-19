@@ -214,6 +214,23 @@ Deno.test("dynamic - union declaration referencing unknown declaration", () => {
   );
 });
 
+Deno.test("dynamic - union declaration references internal declaration", () => {
+  assertEquals(
+    translate(
+      "Declaration = SetDeclaration | U32;\n" +
+        "SetDeclaration :: String;",
+    ),
+    left([
+      {
+        tag: "UnionDeclarationReferenceInteranlDeclarationError",
+        location: range(31, 1, 32, 33, 1, 34),
+        name: "Declaration",
+        reference: "U32",
+      },
+    ]),
+  );
+});
+
 const mkTuple = (value: Array<Type>): Tuple => ({
   tag: "Tuple",
   value: value,

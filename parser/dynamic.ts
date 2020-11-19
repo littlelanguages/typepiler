@@ -93,7 +93,12 @@ export const translateAST = (
               name: t.name.id,
             });
           } else if (declaration.tag === "InternalDeclaration") {
-            throw `TODO - ${declaration}`;
+            errors.push({
+              tag: "UnionDeclarationReferenceInteranlDeclarationError",
+              location: t.name.location,
+              name: d.name.id,
+              reference: t.name.id,
+            });
           } else if (declaration.tag === "AliasDeclaration") {
             throw `TODO - ${declaration}`;
           } else if (declaration.tag === "SetDeclaration") {
