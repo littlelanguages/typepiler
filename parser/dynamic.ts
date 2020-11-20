@@ -163,41 +163,41 @@ export const translateAST = (
     return declaration;
   };
 
-  const flattenDeclaration = (
-    names: Set<string>,
-    d: TST.UnionDeclaration | TST.SimpleComposite | TST.RecordComposite,
-  ): Array<TST.SimpleComposite | TST.RecordComposite> => {
-    if (d.tag === "UnionDeclaration") {
-      if (names.has(d.name)) {
-        throw `Cycle over ${d.name}`;
-      } else {
-        names = S.union(names, S.setOf(d.name));
-
-        return d.elements.flatMap((e) => flattenDeclaration(names, e));
-      }
-    } else {
-      return [d];
-    }
-  };
-
-  const uniqueUnion = (
-    ds: Array<TST.SimpleComposite | TST.RecordComposite>,
-  ): Array<TST.SimpleComposite | TST.RecordComposite> => {
-    let names: Set<string> = new Set();
-    const result: Array<TST.SimpleComposite | TST.RecordComposite> = [];
-
-    ds.forEach((d) => {
-      if (!names.has(d.name)) {
-        result.push(d);
-
-        names.add(d.name);
-      }
-    });
-
-    return result;
-  };
-
   const flattenUnionDeclaration = (d: AST.Declaration) => {
+    const flattenDeclaration = (
+      names: Set<string>,
+      d: TST.UnionDeclaration | TST.SimpleComposite | TST.RecordComposite,
+    ): Array<TST.SimpleComposite | TST.RecordComposite> => {
+      if (d.tag === "UnionDeclaration") {
+        if (names.has(d.name)) {
+          throw d.name;
+        } else {
+          names = S.union(names, S.setOf(d.name));
+
+          return d.elements.flatMap((e) => flattenDeclaration(names, e));
+        }
+      } else {
+        return [d];
+      }
+    };
+
+    const uniqueUnion = (
+      ds: Array<TST.SimpleComposite | TST.RecordComposite>,
+    ): Array<TST.SimpleComposite | TST.RecordComposite> => {
+      let names: Set<string> = new Set();
+      const result: Array<TST.SimpleComposite | TST.RecordComposite> = [];
+
+      ds.forEach((d) => {
+        if (!names.has(d.name)) {
+          result.push(d);
+
+          names.add(d.name);
+        }
+      });
+
+      return result;
+    };
+
     if (d.tag === "UnionDeclaration" && d.elements.length > 1) {
       const tst = getDeclaration(d.name.id) as TST.UnionDeclaration;
 
@@ -212,7 +212,7 @@ export const translateAST = (
           {
             tag: "UnionDeclarationCyclicReferenceError",
             location: d.name.location,
-            name: d.name.id,
+            name: e,
           },
         );
       }
