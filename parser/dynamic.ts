@@ -4,7 +4,6 @@ import { Either, left, right } from "../data/either.ts";
 import * as S from "../data/set.ts";
 import * as Errors from "./errors.ts";
 import { parse } from "./parser.ts";
-import { emptySet } from "../data/set.ts";
 
 export const translate = (
   input: string,
