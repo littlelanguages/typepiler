@@ -1,8 +1,10 @@
 import * as AST from "./ast.ts";
 import * as TST from "../cfg/definition.ts";
 import { Either, left, right } from "../data/either.ts";
+import * as S from "../data/set.ts";
 import * as Errors from "./errors.ts";
 import { parse } from "./parser.ts";
+import { emptySet } from "../data/set.ts";
 
 export const translate = (
   input: string,
@@ -161,6 +163,62 @@ export const translateAST = (
     return declaration;
   };
 
+  const flattenDeclaration = (
+    names: Set<string>,
+    d: TST.UnionDeclaration | TST.SimpleComposite | TST.RecordComposite,
+  ): Array<TST.SimpleComposite | TST.RecordComposite> => {
+    if (d.tag === "UnionDeclaration") {
+      if (names.has(d.name)) {
+        throw `Cycle over ${d.name}`;
+      } else {
+        names = S.union(names, S.setOf(d.name));
+
+        return d.elements.flatMap((e) => flattenDeclaration(names, e));
+      }
+    } else {
+      return [d];
+    }
+  };
+
+  const uniqueUnion = (
+    ds: Array<TST.SimpleComposite | TST.RecordComposite>,
+  ): Array<TST.SimpleComposite | TST.RecordComposite> => {
+    let names: Set<string> = new Set();
+    const result: Array<TST.SimpleComposite | TST.RecordComposite> = [];
+
+    ds.forEach((d) => {
+      if (!names.has(d.name)) {
+        result.push(d);
+
+        names.add(d.name);
+      }
+    });
+
+    return result;
+  };
+
+  const flattenUnionDeclaration = (d: AST.Declaration) => {
+    if (d.tag === "UnionDeclaration" && d.elements.length > 1) {
+      const tst = getDeclaration(d.name.id) as TST.UnionDeclaration;
+
+      try {
+        tst.elements = uniqueUnion(
+          tst.elements.flatMap((e) =>
+            flattenDeclaration(S.setOf(d.name.id), e)
+          ),
+        );
+      } catch (e) {
+        errors.push(
+          {
+            tag: "UnionDeclarationCyclicReferenceError",
+            location: d.name.location,
+            name: d.name.id,
+          },
+        );
+      }
+    }
+  };
+
   const translateType = (type: AST.Type): TST.Type => {
     if (type.tag === "Tuple") {
       return { tag: "Tuple", value: type.value.map(translateType) };
@@ -213,6 +271,7 @@ export const translateAST = (
   });
 
   ast.forEach(translateDeclaration);
+  ast.forEach(flattenUnionDeclaration);
 
   return errors.length === 0 ? right(declarations) : left(errors);
 };

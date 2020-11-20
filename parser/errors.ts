@@ -9,6 +9,7 @@ export type ErrorItem =
   | DuplicateSetElementError
   | IncorrectTypeArityError
   | SyntaxError
+  | UnionDeclarationCyclicReferenceError
   | UnionDeclarationReferenceAliasDeclarationError
   | UnionDeclarationReferenceCompundTypeError
   | UnionDeclarationReferenceInteranlDeclarationError
@@ -39,6 +40,12 @@ export type IncorrectTypeArityError = {
   name: string;
   expected: number;
   actual: number;
+};
+
+export type UnionDeclarationCyclicReferenceError = {
+  tag: "UnionDeclarationCyclicReferenceError";
+  location: Location;
+  name: string;
 };
 
 export type UnionDeclarationReferenceAliasDeclarationError = {

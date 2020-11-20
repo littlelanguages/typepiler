@@ -5,7 +5,6 @@ import {
   Reference,
   Tuple,
   Type,
-  UnionDeclaration,
 } from "../cfg/definition.ts";
 import { left, right } from "../data/either.ts";
 import { assertEquals } from "../testing/asserts.ts";
@@ -262,6 +261,28 @@ Deno.test("dynamic - union declaration references compound type", () => {
       {
         tag: "UnionDeclarationReferenceCompundTypeError",
         location: range(33, 1, 34, 67, 1, 68),
+      },
+    ]),
+  );
+});
+
+Deno.test("dynamic - union declaration has a cycle", () => {
+  assertEquals(
+    translate(
+      "Declaration = SetDeclaration | UnionDeclaration;\n" +
+        "SetDeclaration :: String;\n" +
+        "UnionDeclaration = Declaration | SetDeclaration;\n",
+    ),
+    left([
+      {
+        tag: "UnionDeclarationCyclicReferenceError",
+        location: range(0, 1, 1, 10, 1, 11),
+        name: "Declaration",
+      },
+      {
+        tag: "UnionDeclarationCyclicReferenceError",
+        location: range(75, 3, 1, 90, 3, 16),
+        name: "UnionDeclaration",
       },
     ]),
   );
