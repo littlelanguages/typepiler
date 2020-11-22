@@ -1,6 +1,7 @@
 tokens
     LowerID = lowerAlpha {alpha | digit};
     UpperID = upperAlpha {alpha | digit};
+    LiteralString = '"' {!'"'} '"';
 
 comments
     "/*" to "*/" nested;

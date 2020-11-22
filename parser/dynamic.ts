@@ -255,7 +255,7 @@ export const translateAST = (
     }
   };
 
-  ast.forEach((d) => {
+  ast.declarations.forEach((d) => {
     if (declarationNames.has(d.name.id)) {
       errors.push(
         {
@@ -269,8 +269,8 @@ export const translateAST = (
     }
   });
 
-  ast.forEach(translateDeclaration);
-  ast.forEach(flattenUnionDeclaration);
+  ast.declarations.forEach(translateDeclaration);
+  ast.declarations.forEach(flattenUnionDeclaration);
 
   return errors.length === 0 ? right(declarations) : left(errors);
 };

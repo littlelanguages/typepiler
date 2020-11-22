@@ -1,4 +1,4 @@
-import { Declaration, Declarations, Name, Type } from "./ast.ts";
+import { Declaration, Declarations, Import, Name, Type } from "./ast.ts";
 import * as Parser from "./typepiler-parser.ts";
 import { Token } from "./typepiler-scanner.ts";
 import { combine } from "./location.ts";
@@ -10,6 +10,7 @@ export const parse = (input: string): Either<Errors, Declarations> =>
 
 const visitor: Parser.Visitor<
   Declarations,
+  Import,
   Declaration,
   (id: Name) => Declaration,
   (id: Name) => Declaration,
@@ -17,7 +18,20 @@ const visitor: Parser.Visitor<
   Type,
   Type
 > = {
-  visitDeclarations: (a: Array<Declaration>): Declarations => a,
+  visitDeclarations: (
+    a1: Array<Import>,
+    a2: Array<Declaration>,
+  ): Declarations => ({ imports: a1, declarations: a2 }),
+  visitImport: (
+    a1: Token,
+    a2: Token,
+    a3: [Token, Token] | undefined,
+    a4: Token,
+  ): Import => ({
+    tag: "Import",
+    source: { tag: "LiteralString", location: a2[1], value: a2[2] },
+    qualified: a3 === undefined ? undefined : mkName(a3[1]),
+  }),
   visitDeclaration: (
     a1: Token,
     a2: ([Token, ((name: Name) => Declaration)] | [
@@ -64,20 +78,25 @@ const visitor: Parser.Visitor<
     a2.length === 0
       ? a1
       : { tag: "Tuple", value: [a1, ...a2.map((a) => a[1])] },
-  visitTypeTerm1: (a1: Token, a2: Array<Type>): Type => ({
+  visitTypeTerm1: (
+    a1: Token,
+    a2: [Token, Token] | undefined,
+    a3: Array<Type>,
+  ): Type => ({
     tag: "Reference",
-    name: mkName(a1),
-    parameters: a2,
+    qualifier: a2 === undefined ? undefined : mkName(a1),
+    name: a2 === undefined ? mkName(a1) : mkName(a2[1]),
+    parameters: a3,
   }),
   visitTypeTerm2: (a1: Token, a2: Type, a3: Token): Type => ({
     tag: "Parenthesis",
     location: combine(a1[1], a3[1]),
     type: a2,
   }),
-
-  visitTypeFactor1: (a: Token): Type => ({
+  visitTypeFactor1: (a1: Token, a2: [Token, Token] | undefined): Type => ({
     tag: "Reference",
-    name: mkName(a),
+    qualifier: a2 === undefined ? undefined : mkName(a1),
+    name: a2 === undefined ? mkName(a1) : mkName(a2[1]),
     parameters: [],
   }),
   visitTypeFactor2: (a1: Token, a2: Type, a3: Token): Type => ({

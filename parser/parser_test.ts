@@ -12,7 +12,7 @@ import {
 import { parse } from "./parser.ts";
 
 Deno.test("parser - alias union", () => {
-  const result = parseResult("A = B | C | D;");
+  const result = parseResult("A = B | C | D;").declarations;
 
   assertEquals(result.length, 1);
   assertEquals(result[0].name.id, "A");
@@ -27,7 +27,7 @@ Deno.test("parser - alias union", () => {
 });
 
 Deno.test("parser - set declaration", () => {
-  const result = parseResult("A = {B, C, D};");
+  const result = parseResult("A = {B, C, D};").declarations;
 
   assertEquals(result.length, 1);
   assertEquals(result[0].name.id, "A");
@@ -42,7 +42,7 @@ Deno.test("parser - set declaration", () => {
 });
 
 Deno.test("parser - simple composite", () => {
-  const result = parseResult("Program :: Seq Declaration;");
+  const result = parseResult("Program :: Seq Declaration;").declarations;
 
   assertEquals(result.length, 1);
   assertEquals(result[0].name.id, "Program");
@@ -64,7 +64,7 @@ Deno.test("parser - record composite", () => {
       "  arguments: Seq (Identifier * Type)\n" +
       "  statements: Seq Statement\n" +
       "  suffix: Type * Expression;",
-  );
+  ).declarations;
 
   assertEquals(result.length, 1);
   assertEquals(result[0].name.id, "FunctionDeclaration");
@@ -81,7 +81,7 @@ Deno.test("parser - record composite", () => {
 });
 
 const parseResult = (input: string): Declarations =>
-  parse(input).either((_) => [], (r) => r);
+  parse(input).either((_) => ({ imports: [], declarations: [] }), (r) => r);
 
 const assertField = (f: [Name, Type], n: string, t: string) => {
   assertEquals(f[0].id, n);

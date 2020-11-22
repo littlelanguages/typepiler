@@ -1,6 +1,21 @@
 import { combine, Location } from "./location.ts";
 
-export type Declarations = Array<Declaration>;
+export type Declarations = {
+  imports: Array<Import>;
+  declarations: Array<Declaration>;
+};
+
+export type Import = {
+  tag: "Import";
+  source: LiteralString;
+  qualified: Name | undefined;
+};
+
+export type LiteralString = {
+  tag: "LiteralString";
+  location: Location;
+  value: string;
+};
 
 export type Declaration =
   | SetDeclaration
@@ -47,6 +62,7 @@ export type Tuple = {
 
 export type Reference = {
   tag: "Reference";
+  qualifier: Name | undefined;
   name: Name;
   parameters: Array<Type>;
 };

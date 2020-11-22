@@ -7,6 +7,7 @@ import { mkScanner, Scanner, Token, TToken } from "./typepiler-scanner.ts";
 
 export interface Visitor<
   T_Declarations,
+  T_Import,
   T_Declaration,
   T_Alias,
   T_Composite,
@@ -14,7 +15,16 @@ export interface Visitor<
   T_TypeTerm,
   T_TypeFactor,
 > {
-  visitDeclarations(a: Array<T_Declaration>): T_Declarations;
+  visitDeclarations(
+    a1: Array<T_Import>,
+    a2: Array<T_Declaration>,
+  ): T_Declarations;
+  visitImport(
+    a1: Token,
+    a2: Token,
+    a3: [Token, Token] | undefined,
+    a4: Token,
+  ): T_Import;
   visitDeclaration(
     a1: Token,
     a2: ([Token, T_Alias] | [Token, T_Composite]),
@@ -30,14 +40,19 @@ export interface Visitor<
   visitComposite1(a: T_Type): T_Composite;
   visitComposite2(a: Array<[Token, Token, T_Type]>): T_Composite;
   visitType(a1: T_TypeTerm, a2: Array<[Token, T_TypeTerm]>): T_Type;
-  visitTypeTerm1(a1: Token, a2: Array<T_TypeFactor>): T_TypeTerm;
+  visitTypeTerm1(
+    a1: Token,
+    a2: [Token, Token] | undefined,
+    a3: Array<T_TypeFactor>,
+  ): T_TypeTerm;
   visitTypeTerm2(a1: Token, a2: T_Type, a3: Token): T_TypeTerm;
-  visitTypeFactor1(a: Token): T_TypeFactor;
+  visitTypeFactor1(a1: Token, a2: [Token, Token] | undefined): T_TypeFactor;
   visitTypeFactor2(a1: Token, a2: T_Type, a3: Token): T_TypeFactor;
 }
 
 export const parseDeclarations = <
   T_Declarations,
+  T_Import,
   T_Declaration,
   T_Alias,
   T_Composite,
@@ -48,6 +63,7 @@ export const parseDeclarations = <
   input: string,
   visitor: Visitor<
     T_Declarations,
+    T_Import,
     T_Declaration,
     T_Alias,
     T_Composite,
@@ -65,6 +81,7 @@ export const parseDeclarations = <
 
 export const mkParser = <
   T_Declarations,
+  T_Import,
   T_Declaration,
   T_Alias,
   T_Composite,
@@ -75,6 +92,7 @@ export const mkParser = <
   scanner: Scanner,
   visitor: Visitor<
     T_Declarations,
+    T_Import,
     T_Declaration,
     T_Alias,
     T_Composite,
@@ -110,13 +128,33 @@ export const mkParser = <
 
   return {
     declarations: function (): T_Declarations {
-      const a: Array<T_Declaration> = [];
+      const a1: Array<T_Import> = [];
+
+      while (isToken(TToken.Use)) {
+        const a1t: T_Import = this.import();
+        a1.push(a1t);
+      }
+      const a2: Array<T_Declaration> = [];
 
       while (isToken(TToken.UpperID)) {
-        const at: T_Declaration = this.declaration();
-        a.push(at);
+        const a2t: T_Declaration = this.declaration();
+        a2.push(a2t);
       }
-      return visitor.visitDeclarations(a);
+      return visitor.visitDeclarations(a1, a2);
+    },
+    import: function (): T_Import {
+      const a1: Token = matchToken(TToken.Use);
+      const a2: Token = matchToken(TToken.LiteralString);
+      let a3: [Token, Token] | undefined = undefined;
+
+      if (isToken(TToken.As)) {
+        const a3t1: Token = matchToken(TToken.As);
+        const a3t2: Token = matchToken(TToken.UpperID);
+        const a3t: [Token, Token] = [a3t1, a3t2];
+        a3 = a3t;
+      }
+      const a4: Token = matchToken(TToken.Semicolon);
+      return visitor.visitImport(a1, a2, a3, a4);
     },
     declaration: function (): T_Declaration {
       const a1: Token = matchToken(TToken.UpperID);
@@ -211,13 +249,21 @@ export const mkParser = <
     typeTerm: function (): T_TypeTerm {
       if (isToken(TToken.UpperID)) {
         const a1: Token = matchToken(TToken.UpperID);
-        const a2: Array<T_TypeFactor> = [];
+        let a2: [Token, Token] | undefined = undefined;
+
+        if (isToken(TToken.Period)) {
+          const a2t1: Token = matchToken(TToken.Period);
+          const a2t2: Token = matchToken(TToken.UpperID);
+          const a2t: [Token, Token] = [a2t1, a2t2];
+          a2 = a2t;
+        }
+        const a3: Array<T_TypeFactor> = [];
 
         while (isTokens([TToken.UpperID, TToken.LParen])) {
-          const a2t: T_TypeFactor = this.typeFactor();
-          a2.push(a2t);
+          const a3t: T_TypeFactor = this.typeFactor();
+          a3.push(a3t);
         }
-        return visitor.visitTypeTerm1(a1, a2);
+        return visitor.visitTypeTerm1(a1, a2, a3);
       } else if (isToken(TToken.LParen)) {
         const a1: Token = matchToken(TToken.LParen);
         const a2: T_Type = this.type();
@@ -233,7 +279,16 @@ export const mkParser = <
     },
     typeFactor: function (): T_TypeFactor {
       if (isToken(TToken.UpperID)) {
-        return visitor.visitTypeFactor1(matchToken(TToken.UpperID));
+        const a1: Token = matchToken(TToken.UpperID);
+        let a2: [Token, Token] | undefined = undefined;
+
+        if (isToken(TToken.Period)) {
+          const a2t1: Token = matchToken(TToken.Period);
+          const a2t2: Token = matchToken(TToken.UpperID);
+          const a2t: [Token, Token] = [a2t1, a2t2];
+          a2 = a2t;
+        }
+        return visitor.visitTypeFactor1(a1, a2);
       } else if (isToken(TToken.LParen)) {
         const a1: Token = matchToken(TToken.LParen);
         const a2: T_Type = this.type();

@@ -1,6 +1,8 @@
 uses "./typepiler.llld";
 
-Declarations: {Declaration};
+Declarations: {Import} {Declaration};
+
+Import: "use" LiteralString ["as" UpperID] ";";
 
 Declaration: UpperID ("=" Alias | "::" Composite) ";";
 
@@ -17,11 +19,11 @@ Composite
 Type: TypeTerm {"*" TypeTerm};
 
 TypeTerm
-  : UpperID {TypeFactor}
+  : UpperID ["." UpperID] {TypeFactor}
   | "(" Type ")"
   ;
 
 TypeFactor
-  : UpperID
+  : UpperID ["." UpperID]
   | "(" Type ")"
   ;
