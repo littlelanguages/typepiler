@@ -1,3 +1,8 @@
+export type Types = {
+  canonicalFileName: string;
+  declarations: Declarations;
+};
+
 export type Declarations = Array<Declaration>;
 
 export type Declaration =

@@ -5,15 +5,10 @@ import * as S from "../data/set.ts";
 import * as Errors from "./errors.ts";
 import { parse } from "./parser.ts";
 
-export type Output = {
-  canonicalFileName: string;
-  declarations: TST.Declarations;
-};
-
 export const translate = (
   fileName: string,
   input: string,
-): Promise<Either<Errors.Errors, Array<Output>>> =>
+): Promise<Either<Errors.Errors, Array<TST.Types>>> =>
   Promise.resolve(
     parse(input).andThen(translateAST).map((tst) => [{
       canonicalFileName: fileName,
