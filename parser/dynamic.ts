@@ -5,7 +5,7 @@ import * as S from "../data/set.ts";
 import * as Errors from "./errors.ts";
 import { parse } from "./parser.ts";
 
-export const translate = (
+export const translateContent = (
   fileName: string,
   input: string,
 ): Promise<Either<Errors.Errors, Array<TST.Types>>> =>

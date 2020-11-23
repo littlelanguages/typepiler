@@ -9,7 +9,7 @@ import {
 } from "../cfg/definition.ts";
 import { Either, left, right } from "../data/either.ts";
 import * as Errors from "./errors.ts";
-import { translate as dynamicTranslate } from "./dynamic.ts";
+import { translateContent as dynamicTranslate } from "./dynamic.ts";
 import { mkCoordinate, range } from "./location.ts";
 import { assertEquals } from "../testing/asserts.ts";
 
@@ -323,6 +323,17 @@ Deno.test("dynamic - union declaration has a cycle", async () => {
     ]),
   );
 });
+
+// Deno.test("dynamic - reference a type file", async () => {
+//   const output = await dynamicTranslate(
+//     "./parser/tests.llt",
+//     'use "./typepiler.llt";\nName :: String;',
+//   );
+
+//   const types = output.either(() => [], (r) => r);
+
+//   assertEquals(types.length, 2);
+// });
 
 const translate = async (
   content: string,
