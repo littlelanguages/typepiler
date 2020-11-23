@@ -7,8 +7,8 @@ import { parse } from "./parser.ts";
 
 export const translate = (
   input: string,
-): Either<Errors.Errors, TST.Declarations> =>
-  parse(input).andThen(translateAST);
+): Promise<Either<Errors.Errors, TST.Declarations>> =>
+  Promise.resolve(parse(input).andThen(translateAST));
 
 export const translateAST = (
   ast: AST.Declarations,

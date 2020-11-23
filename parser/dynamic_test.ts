@@ -11,13 +11,17 @@ import { assertEquals } from "../testing/asserts.ts";
 import { translate } from "./dynamic.ts";
 import { mkCoordinate, range } from "./location.ts";
 
-Deno.test("dynamic - empty declaration", () => {
-  assertEquals(translate(""), right([]));
+Deno.test("dynamic - empty declaration", async () => {
+  const output = await translate("");
+
+  assertEquals(output, right([]));
 });
 
-Deno.test("dynamic - duplicate declaration name error", () => {
+Deno.test("dynamic - duplicate declaration name error", async () => {
+  const output = await translate("Boolean = {True, False};\nBoolean = {A, B};");
+
   assertEquals(
-    translate("Boolean = {True, False};\nBoolean = {A, B};"),
+    output,
     left([
       {
         tag: "DuplicateDefinitionError",
@@ -28,18 +32,22 @@ Deno.test("dynamic - duplicate declaration name error", () => {
   );
 });
 
-Deno.test("dynamic - set declaration", () => {
+Deno.test("dynamic - set declaration", async () => {
+  const output = await translate("Boolean = {True, False};");
+
   assertEquals(
-    translate("Boolean = {True, False};"),
+    output,
     right([
       { tag: "SetDeclaration", name: "Boolean", elements: ["True", "False"] },
     ]),
   );
 });
 
-Deno.test("dynamic - duplicate set element from same declaration", () => {
+Deno.test("dynamic - duplicate set element from same declaration", async () => {
+  const output = await translate("Boolean = {True, True};");
+
   assertEquals(
-    translate("Boolean = {True, True};"),
+    output,
     left([
       {
         tag: "DuplicateSetElementError",
@@ -50,11 +58,13 @@ Deno.test("dynamic - duplicate set element from same declaration", () => {
   );
 });
 
-Deno.test("dynamic - duplicate set element from alternative declaration", () => {
+Deno.test("dynamic - duplicate set element from alternative declaration", async () => {
+  const output = await translate(
+    "Boolean = {True, False};\nTroolean = {True, TriFalse, TriDunno};",
+  );
+
   assertEquals(
-    translate(
-      "Boolean = {True, False};\nTroolean = {True, TriFalse, TriDunno};",
-    ),
+    output,
     left([
       {
         tag: "DuplicateSetElementError",
@@ -65,9 +75,11 @@ Deno.test("dynamic - duplicate set element from alternative declaration", () => 
   );
 });
 
-Deno.test("dynamic - alias declaration", () => {
+Deno.test("dynamic - alias declaration", async () => {
+  const output = await translate("Fred = Seq (String * Set String);");
+
   assertEquals(
-    translate("Fred = Seq (String * Set String);"),
+    output,
     right([
       {
         tag: "AliasDeclaration",
@@ -86,9 +98,11 @@ Deno.test("dynamic - alias declaration", () => {
   );
 });
 
-Deno.test("dynamic - reference to unknown declaration", () => {
+Deno.test("dynamic - reference to unknown declaration", async () => {
+  const output = await translate("Fred = Seq (String * Sets String);");
+
   assertEquals(
-    translate("Fred = Seq (String * Sets String);"),
+    output,
     left([
       {
         tag: "UnknownDeclarationError",
@@ -99,11 +113,13 @@ Deno.test("dynamic - reference to unknown declaration", () => {
   );
 });
 
-Deno.test("dynamic - validate number of type parameters", () => {
+Deno.test("dynamic - validate number of type parameters", async () => {
+  const output = await translate(
+    "T1 = Seq;\nT2 = Seq String String;\nT3 = Map String String;\nT4 = Set String;",
+  );
+
   assertEquals(
-    translate(
-      "T1 = Seq;\nT2 = Seq String String;\nT3 = Map String String;\nT4 = Set String;",
-    ),
+    output,
     left([
       {
         tag: "IncorrectTypeArityError",
@@ -123,9 +139,11 @@ Deno.test("dynamic - validate number of type parameters", () => {
   );
 });
 
-Deno.test("dynamic - simple composite", () => {
+Deno.test("dynamic - simple composite", async () => {
+  const output = await translate("Fred :: String * U8;");
+
   assertEquals(
-    translate("Fred :: String * U8;"),
+    output,
     right([
       {
         tag: "SimpleComposite",
@@ -136,9 +154,11 @@ Deno.test("dynamic - simple composite", () => {
   );
 });
 
-Deno.test("dynamic - record composite", () => {
+Deno.test("dynamic - record composite", async () => {
+  const output = await translate("Fred :: a : String * U8 b: F32;");
+
   assertEquals(
-    translate("Fred :: a : String * U8 b: F32;"),
+    output,
     right([
       {
         tag: "RecordComposite",
@@ -152,9 +172,11 @@ Deno.test("dynamic - record composite", () => {
   );
 });
 
-Deno.test("dynamic - record composite field names need to be unique", () => {
+Deno.test("dynamic - record composite field names need to be unique", async () => {
+  const output = await translate("Fred :: a : String * U8 a: F32;");
+
   assertEquals(
-    translate("Fred :: a : String * U8 a: F32;"),
+    output,
     left([
       {
         tag: "DuplicateFieldNameError",
@@ -165,7 +187,7 @@ Deno.test("dynamic - record composite field names need to be unique", () => {
   );
 });
 
-Deno.test("dynamic - union declaration", () => {
+Deno.test("dynamic - union declaration", async () => {
   const d1 = {
     tag: "SimpleComposite",
     name: "SetDeclaration",
@@ -180,11 +202,13 @@ Deno.test("dynamic - union declaration", () => {
     ],
   };
 
+  const output = await translate(
+    "Declaration = SetDeclaration | UnionDeclaration;\n" +
+      "SetDeclaration :: String;\nUnionDeclaration :: v1 : U32 v2 : S32;\n",
+  );
+
   assertEquals(
-    translate(
-      "Declaration = SetDeclaration | UnionDeclaration;\n" +
-        "SetDeclaration :: String;\nUnionDeclaration :: v1 : U32 v2 : S32;\n",
-    ),
+    output,
     right([
       {
         tag: "UnionDeclaration",
@@ -197,12 +221,14 @@ Deno.test("dynamic - union declaration", () => {
   );
 });
 
-Deno.test("dynamic - union declaration referencing unknown declaration", () => {
+Deno.test("dynamic - union declaration referencing unknown declaration", async () => {
+  const output = await translate(
+    "Declaration = SetDeclaration | UnionDeclarations;\n" +
+      "SetDeclaration :: String;\nUnionDeclaration :: v1 : U32 v2 : S32;\n",
+  );
+
   assertEquals(
-    translate(
-      "Declaration = SetDeclaration | UnionDeclarations;\n" +
-        "SetDeclaration :: String;\nUnionDeclaration :: v1 : U32 v2 : S32;\n",
-    ),
+    output,
     left([
       {
         tag: "UnknownDeclarationError",
@@ -213,12 +239,14 @@ Deno.test("dynamic - union declaration referencing unknown declaration", () => {
   );
 });
 
-Deno.test("dynamic - union declaration references internal declaration", () => {
+Deno.test("dynamic - union declaration references internal declaration", async () => {
+  const output = await translate(
+    "Declaration = SetDeclaration | U32;\n" +
+      "SetDeclaration :: String;",
+  );
+
   assertEquals(
-    translate(
-      "Declaration = SetDeclaration | U32;\n" +
-        "SetDeclaration :: String;",
-    ),
+    output,
     left([
       {
         tag: "UnionDeclarationReferenceInteranlDeclarationError",
@@ -230,12 +258,14 @@ Deno.test("dynamic - union declaration references internal declaration", () => {
   );
 });
 
-Deno.test("dynamic - union declaration references alias declaration", () => {
+Deno.test("dynamic - union declaration references alias declaration", async () => {
+  const output = await translate(
+    "Declaration = SetDeclaration | Fred;\n" +
+      "SetDeclaration :: String;\nFred = {A, B, C, D};",
+  );
+
   assertEquals(
-    translate(
-      "Declaration = SetDeclaration | Fred;\n" +
-        "SetDeclaration :: String;\nFred = {A, B, C, D};",
-    ),
+    output,
     left([
       {
         tag: "UnionDeclarationReferenceSetDeclarationError",
@@ -247,12 +277,14 @@ Deno.test("dynamic - union declaration references alias declaration", () => {
   );
 });
 
-Deno.test("dynamic - union declaration references compound type", () => {
+Deno.test("dynamic - union declaration references compound type", async () => {
+  const output = await translate(
+    "Declaration = (SetDeclaration) | UnionDeclaration * UnionDeclaration;\n" +
+      "SetDeclaration :: String;\nUnionDeclaration :: v1 : U32 v2 : S32;\n",
+  );
+
   assertEquals(
-    translate(
-      "Declaration = (SetDeclaration) | UnionDeclaration * UnionDeclaration;\n" +
-        "SetDeclaration :: String;\nUnionDeclaration :: v1 : U32 v2 : S32;\n",
-    ),
+    output,
     left([
       {
         tag: "UnionDeclarationReferenceCompundTypeError",
@@ -266,13 +298,15 @@ Deno.test("dynamic - union declaration references compound type", () => {
   );
 });
 
-Deno.test("dynamic - union declaration has a cycle", () => {
+Deno.test("dynamic - union declaration has a cycle", async () => {
+  const output = await translate(
+    "Declaration = SetDeclaration | UnionDeclaration;\n" +
+      "SetDeclaration :: String;\n" +
+      "UnionDeclaration = Declaration | SetDeclaration;\n",
+  );
+
   assertEquals(
-    translate(
-      "Declaration = SetDeclaration | UnionDeclaration;\n" +
-        "SetDeclaration :: String;\n" +
-        "UnionDeclaration = Declaration | SetDeclaration;\n",
-    ),
+    output,
     left([
       {
         tag: "UnionDeclarationCyclicReferenceError",
