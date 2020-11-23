@@ -326,7 +326,11 @@ Deno.test("dynamic - union declaration has a cycle", async () => {
 
 const translate = async (
   content: string,
-): Promise<Either<Errors.Errors, Declarations>> => dynamicTranslate(content);
+): Promise<Either<Errors.Errors, Declarations>> => {
+  const result = await dynamicTranslate("./parser/tests.llt", content);
+
+  return result.map((output) => output[0].declarations);
+};
 
 const mkTuple = (value: Array<Type>): Tuple => ({
   tag: "Tuple",
