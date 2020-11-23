@@ -1,0 +1,3 @@
+use "./cycleA.llt" as A;
+
+NameC :: String;
