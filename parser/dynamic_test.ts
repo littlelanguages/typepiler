@@ -1,15 +1,17 @@
 import {
   builtinDeclarations,
   Declaration,
+  Declarations,
   InternalDeclaration,
   Reference,
   Tuple,
   Type,
 } from "../cfg/definition.ts";
-import { left, right } from "../data/either.ts";
-import { assertEquals } from "../testing/asserts.ts";
-import { translate } from "./dynamic.ts";
+import { Either, left, right } from "../data/either.ts";
+import * as Errors from "./errors.ts";
+import { translate as dynamicTranslate } from "./dynamic.ts";
 import { mkCoordinate, range } from "./location.ts";
+import { assertEquals } from "../testing/asserts.ts";
 
 Deno.test("dynamic - empty declaration", async () => {
   const output = await translate("");
@@ -321,6 +323,10 @@ Deno.test("dynamic - union declaration has a cycle", async () => {
     ]),
   );
 });
+
+const translate = async (
+  content: string,
+): Promise<Either<Errors.Errors, Declarations>> => dynamicTranslate(content);
 
 const mkTuple = (value: Array<Type>): Tuple => ({
   tag: "Tuple",
