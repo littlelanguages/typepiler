@@ -9,7 +9,10 @@ import {
 } from "../cfg/definition.ts";
 import { Either, left, right } from "../data/either.ts";
 import * as Errors from "./errors.ts";
-import { translateContent as dynamicTranslate } from "./dynamic.ts";
+import {
+  translate as fileTranslate,
+  translateContent as dynamicTranslate,
+} from "./dynamic.ts";
 import { mkCoordinate, range } from "./location.ts";
 import { assertEquals } from "../testing/asserts.ts";
 
@@ -324,16 +327,74 @@ Deno.test("dynamic - union declaration has a cycle", async () => {
   );
 });
 
-// Deno.test("dynamic - reference a type file", async () => {
-//   const output = await dynamicTranslate(
-//     "./parser/tests.llt",
-//     'use "./typepiler.llt";\nName :: String;',
-//   );
+Deno.test("dynamic - load on file name", async () => {
+  const output = await fileTranslate(
+    "./parser/scenarios/valid.llt",
+    new Set<string>(),
+  );
 
-//   const types = output.either(() => [], (r) => r);
+  assertEquals(
+    output.map((types) => types[0].declarations.map((d) => d.name)),
+    right([
+      "Declarations",
+      "Declaration",
+      "SetDeclaration",
+      "UnionDeclaration",
+      "SimpleComposite",
+      "RecordComposite",
+      "ID",
+      "Type",
+      "Tuple",
+      "Reference",
+      "Parenthesis",
+    ]),
+  );
+});
 
-//   assertEquals(types.length, 2);
-// });
+Deno.test("dynamic - use a type file", async () => {
+  const output = await dynamicTranslate(
+    "./parser/tests.llt",
+    'use "./scenarios/valid.llt";\nName :: String;',
+    new Set<string>(),
+  );
+
+  assertEquals(
+    output.map((types) =>
+      types.map((type) => type.declarations.map((d) => d.name))
+    ),
+    right([
+      [
+        "Name",
+      ],
+      [
+        "Declarations",
+        "Declaration",
+        "SetDeclaration",
+        "UnionDeclaration",
+        "SimpleComposite",
+        "RecordComposite",
+        "ID",
+        "Type",
+        "Tuple",
+        "Reference",
+        "Parenthesis",
+      ],
+    ]),
+  );
+});
+
+// Futher scenarios:
+// - Positive:
+//   - use module referenced via URL
+//   - use module referenced via URL that refers to a local module
+//   - unqualified reference to a use declaration
+//   - qualified reference to a use declaration
+//
+// - Negative:
+//   - use file does not exist
+//   - cycle between use files
+//   - invalid reference reference to a qualified module that does not exist
+//   - invalid reference reference to a qualified module that does exist however the identifier does not
 
 const translate = async (
   content: string,

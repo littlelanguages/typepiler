@@ -9,4 +9,4 @@ then
     exit -1
 fi
 
-deno test --allow-none
+deno test --allow-read

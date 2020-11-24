@@ -2,7 +2,7 @@ import * as Path from "https://deno.land/std@0.76.0/path/mod.ts";
 
 import * as AST from "./ast.ts";
 import * as TST from "../cfg/definition.ts";
-import { Either, left, right } from "../data/either.ts";
+import { Either, isLeft, left, right } from "../data/either.ts";
 import * as S from "../data/set.ts";
 import * as Errors from "./errors.ts";
 import { parse } from "./parser.ts";
@@ -286,30 +286,80 @@ export const translateAST = (
     }
   };
 
-  ast.declarations.forEach((d) => {
-    if (declarationNames.has(d.name.id)) {
-      errors.push(
-        {
-          tag: "DuplicateDefinitionError",
-          location: d.name.location,
-          name: d.name.id,
-        },
+  const resolveImports = (): Promise<Either<Errors.Errors, Array<TST.Types>>> =>
+    Promise.all(
+      ast.imports.map((i) =>
+        translate(
+          relativeTo(
+            canonicalFileName,
+            i.source.value.slice(1, i.source.value.length - 1),
+          ),
+          loadedFileNames,
+        )
+      ),
+    )
+      .then(
+        (
+          rs,
+        ) => (rs.some(isLeft)
+          ? left(rs.flatMap((r) => r.either((l) => l, (_) => [])))
+          : right(rs.flatMap((r) => r.either((_) => [], (r) => r)))),
       );
-    } else {
-      populateShellDeclaration(d);
-    }
+
+  const imports = resolveImports();
+
+  return imports.then((imports) => {
+    // console.log(`*************** ${JSON.stringify(imports, null, 2)}`);
+
+    return imports.either((e) => left(e), (i) => {
+      ast.declarations.forEach((d) => {
+        if (declarationNames.has(d.name.id)) {
+          errors.push(
+            {
+              tag: "DuplicateDefinitionError",
+              location: d.name.location,
+              name: d.name.id,
+            },
+          );
+        } else {
+          populateShellDeclaration(d);
+        }
+      });
+
+      ast.declarations.forEach(translateDeclaration);
+      ast.declarations.forEach(flattenUnionDeclaration);
+
+      // console.log(`*************** ${JSON.stringify(declarations, null, 2)}`);
+
+      // console.log(errors);
+
+      return errors.length === 0
+        ? right(
+          [
+            {
+              canonicalFileName: canonicalFileName,
+              declarations: declarations,
+            },
+            ...i,
+          ],
+        )
+        : left(errors);
+    });
   });
-
-  ast.declarations.forEach(translateDeclaration);
-  ast.declarations.forEach(flattenUnionDeclaration);
-
-  return Promise.resolve(
-    errors.length === 0
-      ? right(
-        [{ canonicalFileName: canonicalFileName, declarations: declarations }],
-      )
-      : left(errors),
-  );
 };
 
 const typeShell: TST.Type = { tag: "Tuple", value: [] };
+
+const relativeTo = (src: string, target: string): string => {
+  let srcParse = Path.parse(src);
+  const targetParse = Path.parse(target);
+  return (srcParse.root !== targetParse.root ||
+      targetParse.dir.startsWith("/"))
+    ? target
+    : Path.normalize(Path.format(
+      Object.assign(
+        targetParse,
+        { dir: srcParse.dir + "/" + targetParse.dir },
+      ),
+    ));
+};
