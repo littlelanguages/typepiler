@@ -9,7 +9,7 @@ import { parse } from "./parser.ts";
 
 export const translate = (
   fileName: string,
-  loadedFileNames: Set<string> = new Set(),
+  loadedFileNames: Set<string>,
 ): Promise<Either<Errors.Errors, Array<TST.Types>>> => {
   const resolvedFileName = Path.resolve(fileName);
 
@@ -29,7 +29,7 @@ export const translate = (
 export const translateContent = (
   canonicalFileName: string,
   input: string,
-  loadedFileNames: Set<string> = new Set(),
+  loadedFileNames: Set<string>,
 ): Promise<Either<Errors.Errors, Array<TST.Types>>> => {
   const parseInput: Either<Errors.Errors, AST.Declarations> = parse(input);
 

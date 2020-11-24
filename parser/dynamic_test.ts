@@ -338,7 +338,11 @@ Deno.test("dynamic - union declaration has a cycle", async () => {
 const translate = async (
   content: string,
 ): Promise<Either<Errors.Errors, Declarations>> => {
-  const result = await dynamicTranslate("./parser/tests.llt", content);
+  const result = await dynamicTranslate(
+    "./parser/tests.llt",
+    content,
+    new Set<string>(),
+  );
 
   return result.map((output) => output[0].declarations);
 };
