@@ -1,3 +1,5 @@
+import * as Path from "https://deno.land/std@0.76.0/path/mod.ts";
+
 import * as AST from "./ast.ts";
 import * as TST from "../cfg/definition.ts";
 import { Either, left, right } from "../data/either.ts";
@@ -5,20 +7,43 @@ import * as S from "../data/set.ts";
 import * as Errors from "./errors.ts";
 import { parse } from "./parser.ts";
 
-export const translateContent = (
+export const translate = (
   fileName: string,
+  loadedFileNames: Set<string> = new Set(),
+): Promise<Either<Errors.Errors, Array<TST.Types>>> => {
+  const resolvedFileName = Path.resolve(fileName);
+
+  if (loadedFileNames.has(resolvedFileName)) {
+    // TODO: report module cycle
+    return Promise.resolve(left([]));
+  } else {
+    // TODO: report error if Deno.readTextFile throws error
+
+    loadedFileNames.add(resolvedFileName);
+    return Deno.readTextFile(resolvedFileName).then((content) =>
+      translateContent(resolvedFileName, content, loadedFileNames)
+    );
+  }
+};
+
+export const translateContent = (
+  canonicalFileName: string,
   input: string,
-): Promise<Either<Errors.Errors, Array<TST.Types>>> =>
-  Promise.resolve(
-    parse(input).andThen(translateAST).map((tst) => [{
-      canonicalFileName: fileName,
-      declarations: tst,
-    }]),
+  loadedFileNames: Set<string> = new Set(),
+): Promise<Either<Errors.Errors, Array<TST.Types>>> => {
+  const parseInput: Either<Errors.Errors, AST.Declarations> = parse(input);
+
+  return parseInput.either(
+    (e: Errors.Errors) => Promise.resolve(left(e)),
+    (ast) => translateAST(canonicalFileName, ast, loadedFileNames),
   );
+};
 
 export const translateAST = (
+  canonicalFileName: string,
   ast: AST.Declarations,
-): Either<Errors.Errors, TST.Declarations> => {
+  loadedFileNames: Set<string>,
+): Promise<Either<Errors.Errors, Array<TST.Types>>> => {
   const setElements = new Set<string>();
   const declarationNames = new Set<string>(
     [...TST.builtinDeclarations.map((d) => d.name)],
@@ -278,7 +303,13 @@ export const translateAST = (
   ast.declarations.forEach(translateDeclaration);
   ast.declarations.forEach(flattenUnionDeclaration);
 
-  return errors.length === 0 ? right(declarations) : left(errors);
+  return Promise.resolve(
+    errors.length === 0
+      ? right(
+        [{ canonicalFileName: canonicalFileName, declarations: declarations }],
+      )
+      : left(errors),
+  );
 };
 
 const typeShell: TST.Type = { tag: "Tuple", value: [] };
