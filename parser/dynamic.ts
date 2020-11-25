@@ -15,8 +15,6 @@ export const translate = (
 
   const resolvedFileName = isURL ? fileName : Path.resolve(fileName);
 
-  console.log(`***** ${resolvedFileName}`);
-
   const readContent = (): Promise<string> =>
     isURL
       ? fetch(resolvedFileName).then((response) => response.text())
