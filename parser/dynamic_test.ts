@@ -355,13 +355,13 @@ Deno.test("dynamic - use a type file", async () => {
 
 Deno.test("dynamic - reference a type file using a URL", async () => {
   const output = await fileTranslate(
-    "https://raw.githubusercontent.com/littlelanguages/typepiler/main/parser/scenarios/valid.llt",
+    "https://raw.githubusercontent.com/littlelanguages/typepiler/main/parser/scenarios/validRef.llt",
     new Set<string>(),
   );
 
   assertEquals(
     names(output),
-    right([validNames]),
+    right([["ValidRef"], validNames]),
   );
 });
 

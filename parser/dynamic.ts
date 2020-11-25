@@ -357,14 +357,30 @@ export const translateAST = (
 const typeShell: TST.Type = { tag: "Tuple", value: [] };
 
 const relativeTo = (src: string, target: string): string => {
-  let srcParse = Path.parse(src);
-  const targetParse = Path.parse(target);
+  if (src.startsWith("http")) {
+    const srcURL = new URL(src);
+    const srcParse = Path.parse(srcURL.pathname);
+    const targetParse = Path.parse(target);
 
-  return targetParse.dir.startsWith("/") ? target : Path.resolve(Path.format(
-    Object.assign(
-      {},
-      targetParse,
-      { dir: srcParse.dir + "/" + targetParse.dir },
-    ),
-  ));
+    srcURL.pathname = Path.normalize(Path.format(
+      Object.assign(
+        {},
+        targetParse,
+        { dir: srcParse.dir + "/" + targetParse.dir },
+      ),
+    ));
+
+    return srcURL.toString();
+  } else {
+    const srcParse = Path.parse(src);
+    const targetParse = Path.parse(target);
+
+    return targetParse.dir.startsWith("/") ? target : Path.resolve(Path.format(
+      Object.assign(
+        {},
+        targetParse,
+        { dir: srcParse.dir + "/" + targetParse.dir },
+      ),
+    ));
+  }
 };
