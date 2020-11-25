@@ -335,19 +335,7 @@ Deno.test("dynamic - load on file name", async () => {
 
   assertEquals(
     output.map((types) => types[0].declarations.map((d) => d.name)),
-    right([
-      "Declarations",
-      "Declaration",
-      "SetDeclaration",
-      "UnionDeclaration",
-      "SimpleComposite",
-      "RecordComposite",
-      "ID",
-      "Type",
-      "Tuple",
-      "Reference",
-      "Parenthesis",
-    ]),
+    right(validNames),
   );
 });
 
@@ -366,22 +354,24 @@ Deno.test("dynamic - use a type file", async () => {
       [
         "Name",
       ],
-      [
-        "Declarations",
-        "Declaration",
-        "SetDeclaration",
-        "UnionDeclaration",
-        "SimpleComposite",
-        "RecordComposite",
-        "ID",
-        "Type",
-        "Tuple",
-        "Reference",
-        "Parenthesis",
-      ],
+      validNames,
     ]),
   );
 });
+
+const validNames = [
+  "Declarations",
+  "Declaration",
+  "SetDeclaration",
+  "UnionDeclaration",
+  "SimpleComposite",
+  "RecordComposite",
+  "ID",
+  "Type",
+  "Tuple",
+  "Reference",
+  "Parenthesis",
+];
 
 // Futher scenarios:
 // - Positive:
