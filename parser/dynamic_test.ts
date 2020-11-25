@@ -330,13 +330,13 @@ Deno.test("dynamic - union declaration has a cycle", async () => {
 
 Deno.test("dynamic - load on file name", async () => {
   const output = await fileTranslate(
-    "./parser/scenarios/valid.llt",
+    "./parser/scenarios/validRef.llt",
     new Set<string>(),
   );
 
   assertEquals(
     names(output),
-    right([validNames]),
+    right([["ValidRef"], validNames]),
   );
 });
 
@@ -388,7 +388,6 @@ const validNames = [
 
 // Futher scenarios:
 // - Positive:
-//   - use module referenced via URL
 //   - use module referenced via URL that refers to a local module
 //   - unqualified reference to a use declaration
 //   - qualified reference to a use declaration

@@ -9,6 +9,7 @@ export type ErrorItem =
   | DuplicateSetElementError
   | IncorrectTypeArityError
   | SyntaxError
+  | TypeDefinitionFileDoesNotExistError
   | UnionDeclarationCyclicReferenceError
   | UnionDeclarationReferenceAliasDeclarationError
   | UnionDeclarationReferenceCompundTypeError
@@ -40,6 +41,11 @@ export type IncorrectTypeArityError = {
   name: string;
   expected: number;
   actual: number;
+};
+
+export type TypeDefinitionFileDoesNotExistError = {
+  tag: "TypeDefinitionFileDoesNotExistError";
+  name: string;
 };
 
 export type UnionDeclarationCyclicReferenceError = {

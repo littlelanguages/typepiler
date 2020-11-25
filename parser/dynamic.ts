@@ -24,11 +24,16 @@ export const translate = (
     // TODO: report module cycle
     return Promise.resolve(left([]));
   } else {
-    // TODO: report error if Deno.readTextFile throws error
-
     loadedFileNames.add(resolvedFileName);
     return readContent().then((content) =>
       translateContent(resolvedFileName, content, loadedFileNames)
+    ).catch((_) =>
+      left(
+        [{
+          tag: "TypeDefinitionFileDoesNotExistError",
+          name: resolvedFileName,
+        }],
+      )
     );
   }
 };
@@ -316,8 +321,6 @@ export const translateAST = (
   const imports = resolveImports();
 
   return imports.then((imports) => {
-    // console.log(`*************** ${JSON.stringify(imports, null, 2)}`);
-
     return imports.either((e) => left(e), (i) => {
       ast.declarations.forEach((d) => {
         if (declarationNames.has(d.name.id)) {
@@ -335,10 +338,6 @@ export const translateAST = (
 
       ast.declarations.forEach(translateDeclaration);
       ast.declarations.forEach(flattenUnionDeclaration);
-
-      // console.log(`*************** ${JSON.stringify(declarations, null, 2)}`);
-
-      // console.log(errors);
 
       return errors.length === 0
         ? right(
@@ -360,13 +359,12 @@ const typeShell: TST.Type = { tag: "Tuple", value: [] };
 const relativeTo = (src: string, target: string): string => {
   let srcParse = Path.parse(src);
   const targetParse = Path.parse(target);
-  return (srcParse.root !== targetParse.root ||
-      targetParse.dir.startsWith("/"))
-    ? target
-    : Path.normalize(Path.format(
-      Object.assign(
-        targetParse,
-        { dir: srcParse.dir + "/" + targetParse.dir },
-      ),
-    ));
+
+  return targetParse.dir.startsWith("/") ? target : Path.resolve(Path.format(
+    Object.assign(
+      {},
+      targetParse,
+      { dir: srcParse.dir + "/" + targetParse.dir },
+    ),
+  ));
 };
