@@ -388,12 +388,10 @@ const validNames = [
 
 // Futher scenarios:
 // - Positive:
-//   - use module referenced via URL that refers to a local module
 //   - unqualified reference to a use declaration
 //   - qualified reference to a use declaration
 //
 // - Negative:
-//   - use file does not exist
 //   - cycle between use files
 //   - invalid reference reference to a qualified module that does not exist
 //   - invalid reference reference to a qualified module that does exist however the identifier does not
