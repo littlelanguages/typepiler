@@ -11,7 +11,16 @@ export const translate = (
   fileName: string,
   loadedFileNames: Set<string>,
 ): Promise<Either<Errors.Errors, Array<TST.Types>>> => {
-  const resolvedFileName = Path.resolve(fileName);
+  const isURL = fileName.startsWith("http");
+
+  const resolvedFileName = isURL ? fileName : Path.resolve(fileName);
+
+  console.log(`***** ${resolvedFileName}`);
+
+  const readContent = (): Promise<string> =>
+    isURL
+      ? fetch(resolvedFileName).then((response) => response.text())
+      : Deno.readTextFile(resolvedFileName);
 
   if (loadedFileNames.has(resolvedFileName)) {
     // TODO: report module cycle
@@ -20,7 +29,7 @@ export const translate = (
     // TODO: report error if Deno.readTextFile throws error
 
     loadedFileNames.add(resolvedFileName);
-    return Deno.readTextFile(resolvedFileName).then((content) =>
+    return readContent().then((content) =>
       translateContent(resolvedFileName, content, loadedFileNames)
     );
   }

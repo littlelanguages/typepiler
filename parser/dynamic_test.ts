@@ -6,6 +6,7 @@ import {
   Reference,
   Tuple,
   Type,
+  Types,
 } from "../cfg/definition.ts";
 import { Either, left, right } from "../data/either.ts";
 import * as Errors from "./errors.ts";
@@ -334,8 +335,8 @@ Deno.test("dynamic - load on file name", async () => {
   );
 
   assertEquals(
-    output.map((types) => types[0].declarations.map((d) => d.name)),
-    right(validNames),
+    names(output),
+    right([validNames]),
   );
 });
 
@@ -347,17 +348,29 @@ Deno.test("dynamic - use a type file", async () => {
   );
 
   assertEquals(
-    output.map((types) =>
-      types.map((type) => type.declarations.map((d) => d.name))
-    ),
-    right([
-      [
-        "Name",
-      ],
-      validNames,
-    ]),
+    names(output),
+    right([["Name"], validNames]),
   );
 });
+
+Deno.test("dynamic - reference a type file using a URL", async () => {
+  const output = await fileTranslate(
+    "https://raw.githubusercontent.com/littlelanguages/typepiler/main/parser/scenarios/valid.llt",
+    new Set<string>(),
+  );
+
+  assertEquals(
+    names(output),
+    right([validNames]),
+  );
+});
+
+const names = (
+  output: Either<Errors.Errors, Array<Types>>,
+): Either<Errors.Errors, Array<Array<string>>> =>
+  output.map((types) =>
+    types.map((type) => type.declarations.map((d) => d.name))
+  );
 
 const validNames = [
   "Declarations",
