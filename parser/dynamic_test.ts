@@ -11,8 +11,8 @@ import {
 import { Either, left, right } from "../data/either.ts";
 import * as Errors from "./errors.ts";
 import {
-  translate as fileTranslate,
   translateContent as dynamicTranslate,
+  translateFiles,
 } from "./dynamic.ts";
 import { mkCoordinate, range } from "./location.ts";
 import { assertEquals } from "../testing/asserts.ts";
@@ -328,11 +328,8 @@ Deno.test("dynamic - union declaration has a cycle", async () => {
   );
 });
 
-Deno.test("dynamic - load on file name", async () => {
-  const output = await fileTranslate(
-    "./parser/scenarios/validRef.llt",
-    new Set<string>(),
-  );
+Deno.test("dynamic - use - on file name", async () => {
+  const output = await translateFiles(["./parser/scenarios/validRef.llt"]);
 
   assertEquals(
     names(output),
@@ -340,7 +337,7 @@ Deno.test("dynamic - load on file name", async () => {
   );
 });
 
-Deno.test("dynamic - use a type file", async () => {
+Deno.test("dynamic - use - type file uses a second type file", async () => {
   const output = await dynamicTranslate(
     "./parser/tests.llt",
     'use "./scenarios/valid.llt";\nName :: String;',
@@ -353,15 +350,27 @@ Deno.test("dynamic - use a type file", async () => {
   );
 });
 
-Deno.test("dynamic - reference a type file using a URL", async () => {
-  const output = await fileTranslate(
-    "https://raw.githubusercontent.com/littlelanguages/typepiler/main/parser/scenarios/validRef.llt",
-    new Set<string>(),
+Deno.test("dynamic - use - using a URL", async () => {
+  const output = await translateFiles(
+    ["https://raw.githubusercontent.com/littlelanguages/typepiler/main/parser/scenarios/validRef.llt"],
   );
-
   assertEquals(
     names(output),
     right([["ValidRef"], validNames]),
+  );
+});
+
+Deno.test("dynamic - use - multiple references", async () => {
+  const output = await translateFiles(
+    [
+      "./parser/scenarios/validRefA.llt",
+      "./parser/scenarios/validRef.llt",
+      "https://raw.githubusercontent.com/littlelanguages/typepiler/main/parser/scenarios/validRef.llt",
+    ],
+  );
+  assertEquals(
+    names(output),
+    right([["ValidRefA"], validNames, ["ValidRef"], ["ValidRef"], validNames]),
   );
 });
 

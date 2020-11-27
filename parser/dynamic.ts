@@ -7,7 +7,37 @@ import * as S from "../data/set.ts";
 import * as Errors from "./errors.ts";
 import { parse } from "./parser.ts";
 
-export const translate = (
+export const translateFiles = (
+  srcNames: Array<string>,
+): Promise<Either<Errors.Errors, Array<TST.Types>>> => {
+  return Promise.all(
+    srcNames.map((srcName) => {
+      const resolvedSrcName = resolveSrcName(srcName);
+
+      return translate(
+        resolvedSrcName,
+        S.emptySet as Set<string>,
+      );
+    }),
+  ).then((
+    rs,
+  ) => (rs.some(isLeft)
+    ? left(rs.flatMap((r) => r.either((l) => l, (_) => [])))
+    : right(mergeTypes(rs.flatMap((r) => r.either((_) => [], (r) => r)))))
+  );
+};
+
+export const isSrcLoaded = (
+  srcName: string,
+  types: Array<TST.Types>,
+): boolean => {
+  return types.find((t) => t.canonicalFileName === srcName) !== undefined;
+};
+
+const resolveSrcName = (srcName: string): string =>
+  srcName.startsWith("http") ? srcName : Path.resolve(srcName);
+
+const translate = (
   fileName: string,
   loadedFileNames: Set<string>,
 ): Promise<Either<Errors.Errors, Array<TST.Types>>> => {
@@ -21,12 +51,18 @@ export const translate = (
       : Deno.readTextFile(resolvedFileName);
 
   if (loadedFileNames.has(resolvedFileName)) {
+    console.log(
+      `Cycle detected: ${[...loadedFileNames]} -- ${resolvedFileName}`,
+    );
     // TODO: report module cycle
     return Promise.resolve(left([]));
   } else {
-    loadedFileNames.add(resolvedFileName);
     return readContent().then((content) =>
-      translateContent(resolvedFileName, content, loadedFileNames)
+      translateContent(
+        resolvedFileName,
+        content,
+        S.union(S.setOf(resolvedFileName), loadedFileNames),
+      )
     ).catch((_) =>
       left(
         [{
@@ -309,14 +345,13 @@ export const translateAST = (
           loadedFileNames,
         )
       ),
-    )
-      .then(
-        (
-          rs,
-        ) => (rs.some(isLeft)
-          ? left(rs.flatMap((r) => r.either((l) => l, (_) => [])))
-          : right(rs.flatMap((r) => r.either((_) => [], (r) => r)))),
-      );
+    ).then(
+      (
+        rs,
+      ) => (rs.some(isLeft)
+        ? left(rs.flatMap((r) => r.either((l) => l, (_) => [])))
+        : right(rs.flatMap((r) => r.either((_) => [], (r) => r)))),
+    );
 
   const imports = resolveImports();
 
@@ -383,4 +418,23 @@ const relativeTo = (src: string, target: string): string => {
       ),
     ));
   }
+};
+
+const mergeTypes = (types: Array<TST.Types>): Array<TST.Types> => {
+  const result: Array<TST.Types> = [];
+
+  // console.log("***************************");
+  // console.log(types);
+
+  types.forEach((type) => {
+    if (!isSrcLoaded(type.canonicalFileName, result)) {
+      result.push(type);
+    }
+  });
+
+  // console.log("---------------------------");
+  // console.log(result);
+  // console.log("***************************");
+
+  return result;
 };
