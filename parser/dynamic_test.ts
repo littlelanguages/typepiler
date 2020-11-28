@@ -485,6 +485,23 @@ Deno.test("dynamic - use as name clash", async () => {
   );
 });
 
+Deno.test("dynamic - use name reference clash", async () => {
+  const output = await translate(
+    'use "./scenarios/validRef.llt";\nuse "./scenarios/validRef.llt";',
+  );
+
+  assertEquals(
+    output,
+    left([
+      {
+        tag: "DuplicateDefinitionError",
+        location: range(36, 2, 5, 61, 2, 30),
+        name: "ValidRef",
+      },
+    ]),
+  );
+});
+
 const names = (
   output: Either<Errors.Errors, Array<Types>>,
 ): Either<Errors.Errors, Array<Array<string>>> =>
@@ -505,11 +522,6 @@ const validNames = [
   "Reference",
   "Parenthesis",
 ];
-
-// Futher scenarios:
-// - Negative:
-//   - use name clash
-//   - name clash on imports
 
 const translate = async (
   content: string,

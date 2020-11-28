@@ -19,7 +19,7 @@ export const translateFiles = (
     rs,
   ) => (rs.some(isLeft)
     ? left(rs.flatMap((r) => r.either((l) => l, (_) => [])))
-    : right(mergeTypes(rs.flatMap((r) => r.either((_) => [], (r) => r)))))
+    : right(mergeTypes(rs.map((r) => r.either((_) => [], (r) => r)))))
   );
 
 export const isSrcLoaded = (
@@ -358,29 +358,30 @@ export const translateAST = (
     }
   };
 
-  const imports: Promise<Either<Errors.Errors, Array<TST.Types>>> = Promise.all(
-    ast.imports.map((i) =>
-      translate(
-        relativeTo(
-          canonicalFileName,
-          i.source.value.slice(1, i.source.value.length - 1),
-        ),
-        loadedFileNames,
-      )
-    ),
-  ).then(
-    (
-      rs,
-    ) => (rs.some(isLeft)
-      ? left(rs.flatMap((r) => r.either((l) => l, (_) => [])))
-      : right(rs.flatMap((r) => r.either((_) => [], (r) => r)))),
-  );
+  const imports: Promise<Either<Errors.Errors, Array<Array<TST.Types>>>> =
+    Promise.all(
+      ast.imports.map((i) =>
+        translate(
+          relativeTo(
+            canonicalFileName,
+            i.source.value.slice(1, i.source.value.length - 1),
+          ),
+          loadedFileNames,
+        )
+      ),
+    ).then(
+      (
+        rs,
+      ) => (rs.some(isLeft)
+        ? left(rs.flatMap((r) => r.either((l) => l, (_) => [])))
+        : right(rs.map((r) => r.either((_) => [], (r) => r)))),
+    );
 
-  return imports.then((imports) => {
-    return imports.either((e) => left(e), (i) => {
+  return imports.then((imports) =>
+    imports.either((e) => left(e), (i) => {
       ast.imports.forEach((imp, idx) => {
         if (imp.qualified === undefined) {
-          i[idx].declarations.forEach((d) => {
+          i[idx][0].declarations.forEach((d) => {
             if (declarationBindings.has(d.name)) {
               errors.push({
                 tag: "DuplicateDefinitionError",
@@ -403,7 +404,7 @@ export const translateAST = (
             {
               tag: "UseAlias",
               bindings: new Map<string, TST.Declaration>(
-                i[idx].declarations.map((d) => [d.name, d]),
+                i[idx][0].declarations.map((d) => [d.name, d]),
               ),
             },
           );
@@ -429,17 +430,19 @@ export const translateAST = (
 
       return errors.length === 0
         ? right(
-          [
-            {
-              canonicalFileName: canonicalFileName,
-              declarations: declarations,
-            },
-            ...i,
-          ],
+          mergeTypes(
+            [
+              [{
+                canonicalFileName: canonicalFileName,
+                declarations: declarations,
+              }],
+              ...i,
+            ],
+          ),
         )
         : left(errors);
-    });
-  });
+    })
+  );
 };
 
 const typeShell: TST.Type = { tag: "Tuple", value: [] };
@@ -473,21 +476,16 @@ const relativeTo = (src: string, target: string): string => {
   }
 };
 
-const mergeTypes = (types: Array<TST.Types>): Array<TST.Types> => {
+const mergeTypes = (typess: Array<Array<TST.Types>>): Array<TST.Types> => {
   const result: Array<TST.Types> = [];
 
-  // console.log("***************************");
-  // console.log(types);
-
-  types.forEach((type) => {
-    if (!isSrcLoaded(type.canonicalFileName, result)) {
-      result.push(type);
-    }
-  });
-
-  // console.log("---------------------------");
-  // console.log(result);
-  // console.log("***************************");
+  typess.forEach((types) =>
+    types.forEach((type) => {
+      if (!isSrcLoaded(type.canonicalFileName, result)) {
+        result.push(type);
+      }
+    })
+  );
 
   return result;
 };
