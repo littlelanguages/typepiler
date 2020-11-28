@@ -451,6 +451,23 @@ Deno.test("dynamic - reference to qualified module that does not exist", async (
   );
 });
 
+Deno.test("dynamic - reference to qualified module that does exist however the ID does not", async () => {
+  const output = await translate(
+    'use "./scenarios/valid.llt" as X;\nName :: X.IDS;',
+  );
+
+  assertEquals(
+    output,
+    left([
+      {
+        tag: "UnknownDeclarationError",
+        location: range(42, 2, 9, 46, 2, 13),
+        name: "X.IDS",
+      },
+    ]),
+  );
+});
+
 const names = (
   output: Either<Errors.Errors, Array<Types>>,
 ): Either<Errors.Errors, Array<Array<string>>> =>
