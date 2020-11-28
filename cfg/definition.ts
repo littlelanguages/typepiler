@@ -15,30 +15,35 @@ export type Declaration =
 
 export type SetDeclaration = {
   tag: "SetDeclaration";
+  src: string;
   name: string;
   elements: Array<String>;
 };
 
 export type AliasDeclaration = {
   tag: "AliasDeclaration";
+  src: string;
   name: string;
   type: Type;
 };
 
 export type UnionDeclaration = {
   tag: "UnionDeclaration";
+  src: string;
   name: string;
   elements: Array<UnionDeclaration | SimpleComposite | RecordComposite>;
 };
 
 export type SimpleComposite = {
   tag: "SimpleComposite";
+  src: string;
   name: string;
   type: Type;
 };
 
 export type RecordComposite = {
   tag: "RecordComposite";
+  src: string;
   name: string;
   fields: Array<[String, Type]>;
 };

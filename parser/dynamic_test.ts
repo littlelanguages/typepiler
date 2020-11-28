@@ -17,6 +17,8 @@ import {
 import { mkCoordinate, range } from "./location.ts";
 import { assertEquals } from "../testing/asserts.ts";
 
+const SRC = "./parser/tests.llt";
+
 Deno.test("dynamic - empty declaration", async () => {
   const output = await translate("");
 
@@ -44,7 +46,12 @@ Deno.test("dynamic - set declaration", async () => {
   assertEquals(
     output,
     right([
-      { tag: "SetDeclaration", name: "Boolean", elements: ["True", "False"] },
+      {
+        tag: "SetDeclaration",
+        src: SRC,
+        name: "Boolean",
+        elements: ["True", "False"],
+      },
     ]),
   );
 });
@@ -89,6 +96,7 @@ Deno.test("dynamic - alias declaration", async () => {
     right([
       {
         tag: "AliasDeclaration",
+        src: SRC,
         name: "Fred",
         type: builtInReference(
           "Seq",
@@ -153,6 +161,7 @@ Deno.test("dynamic - simple composite", async () => {
     right([
       {
         tag: "SimpleComposite",
+        src: SRC,
         name: "Fred",
         type: mkTuple([builtInReference("String"), builtInReference("U8")]),
       },
@@ -168,6 +177,7 @@ Deno.test("dynamic - record composite", async () => {
     right([
       {
         tag: "RecordComposite",
+        src: SRC,
         name: "Fred",
         fields: [
           ["a", mkTuple([builtInReference("String"), builtInReference("U8")])],
@@ -196,11 +206,13 @@ Deno.test("dynamic - record composite field names need to be unique", async () =
 Deno.test("dynamic - union declaration", async () => {
   const d1 = {
     tag: "SimpleComposite",
+    src: SRC,
     name: "SetDeclaration",
     type: builtInReference("String"),
   };
   const d2 = {
     tag: "RecordComposite",
+    src: SRC,
     name: "UnionDeclaration",
     fields: [
       ["v1", builtInReference("U32")],
@@ -218,6 +230,7 @@ Deno.test("dynamic - union declaration", async () => {
     right([
       {
         tag: "UnionDeclaration",
+        src: SRC,
         name: "Declaration",
         elements: [d1, d2],
       },
@@ -423,7 +436,6 @@ const validNames = [
 
 // Futher scenarios:
 // - Positive:
-//   - qualified reference to a use declaration
 //   - incorporate src into each declaration
 //
 // - Negative:
@@ -437,7 +449,7 @@ const translate = async (
   content: string,
 ): Promise<Either<Errors.Errors, Declarations>> => {
   const result = await dynamicTranslate(
-    "./parser/tests.llt",
+    SRC,
     content,
     new Set<string>(),
   );

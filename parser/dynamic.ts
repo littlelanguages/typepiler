@@ -107,29 +107,34 @@ export const translateAST = (
     const declaration: TST.Declaration = (d.tag === "SetDeclaration")
       ? {
         tag: "SetDeclaration",
+        src: canonicalFileName,
         name: d.name.id,
         elements: [],
       }
       : (d.tag === "UnionDeclaration" && d.elements.length === 1)
       ? {
         tag: "AliasDeclaration",
+        src: canonicalFileName,
         name: d.name.id,
         type: typeShell,
       }
       : (d.tag === "UnionDeclaration")
       ? {
         tag: "UnionDeclaration",
+        src: canonicalFileName,
         name: d.name.id,
         elements: [],
       }
       : (d.tag === "SimpleComposite")
       ? {
         tag: "SimpleComposite",
+        src: canonicalFileName,
         name: d.name.id,
         type: typeShell,
       }
       : {
         tag: "RecordComposite",
+        src: canonicalFileName,
         name: d.name.id,
         fields: [],
       };
