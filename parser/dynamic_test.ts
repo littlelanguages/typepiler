@@ -402,6 +402,19 @@ Deno.test("dynamic - use - unqualified reference to a use declaration", async ()
   );
 });
 
+Deno.test("dynamic - use - qualified reference to a use declaration", async () => {
+  const output = await dynamicTranslate(
+    "./parser/tests.llt",
+    'use "./scenarios/valid.llt" as D;\nName :: D.ID;',
+    new Set<string>(),
+  );
+
+  assertEquals(
+    names(output),
+    right([["Name"], validNames]),
+  );
+});
+
 Deno.test("dynamic - use - cycle", async () => {
   const output = await translate('use "./scenarios/cycleA.llt";');
   const errors = output.either((es) => es, (_) => []);
@@ -423,16 +436,18 @@ Deno.test("dynamic - use - cycle", async () => {
   );
 });
 
-Deno.test("dynamic - use - qualified reference to a use declaration", async () => {
-  const output = await dynamicTranslate(
-    "./parser/tests.llt",
-    'use "./scenarios/valid.llt" as D;\nName :: D.ID;',
-    new Set<string>(),
-  );
+Deno.test("dynamic - reference to qualified module that does not exist", async () => {
+  const output = await translate("Fred = X.ID;");
 
   assertEquals(
-    names(output),
-    right([["Name"], validNames]),
+    output,
+    left([
+      {
+        tag: "UnknownDeclarationError",
+        location: range(7, 1, 8, 10, 1, 11),
+        name: "X.ID",
+      },
+    ]),
   );
 });
 
@@ -459,7 +474,6 @@ const validNames = [
 
 // Futher scenarios:
 // - Negative:
-//   - invalid reference reference to a qualified module that does not exist
 //   - invalid reference reference to a qualified module that does exist however the identifier does not
 //   - use name clash
 //   - use as name clash

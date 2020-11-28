@@ -6,6 +6,7 @@ import { Either, isLeft, left, right } from "../data/either.ts";
 import * as S from "../data/set.ts";
 import * as Errors from "./errors.ts";
 import { parse } from "./parser.ts";
+import { combine } from "./location.ts";
 
 export const translateFiles = (
   srcNames: Array<string>,
@@ -171,32 +172,39 @@ export const translateAST = (
         if (t.tag === "Reference") {
           const declaration = getDeclaration(t.name.id, t.qualifier?.id);
 
+          const location = t.qualifier === undefined
+            ? t.name.location
+            : combine(t.qualifier.location, t.name.location);
+          const name = t.qualifier === undefined
+            ? t.name.id
+            : `${t.qualifier.id}.${t.name.id}`;
+
           if (declaration === undefined) {
             errors.push({
               tag: "UnknownDeclarationError",
-              location: t.name.location,
-              name: t.name.id,
+              location,
+              name,
             });
           } else if (declaration.tag === "InternalDeclaration") {
             errors.push({
               tag: "UnionDeclarationReferenceInteranlDeclarationError",
-              location: t.name.location,
+              location,
               name: d.name.id,
-              reference: t.name.id,
+              reference: name,
             });
           } else if (declaration.tag === "AliasDeclaration") {
             errors.push({
               tag: "UnionDeclarationReferenceAliasDeclarationError",
-              location: t.name.location,
+              location,
               name: d.name.id,
-              reference: t.name.id,
+              reference: name,
             });
           } else if (declaration.tag === "SetDeclaration") {
             errors.push({
               tag: "UnionDeclarationReferenceSetDeclarationError",
-              location: t.name.location,
+              location,
               name: d.name.id,
-              reference: t.name.id,
+              reference: name,
             });
           } else {
             tst.elements.push(declaration);
@@ -320,8 +328,12 @@ export const translateAST = (
       if (d === undefined) {
         errors.push({
           tag: "UnknownDeclarationError",
-          location: type.name.location,
-          name: type.name.id,
+          location: type.qualifier === undefined
+            ? type.name.location
+            : combine(type.qualifier.location, type.name.location),
+          name: type.qualifier === undefined
+            ? type.name.id
+            : `${type.qualifier.id}.${type.name.id}`,
         });
         return typeShell;
       } else if (
