@@ -468,6 +468,23 @@ Deno.test("dynamic - reference to qualified module that does exist however the I
   );
 });
 
+Deno.test("dynamic - use as name clash", async () => {
+  const output = await translate(
+    'use "./scenarios/valid.llt" as X;\nuse "./scenarios/validRefA.llt" as X;',
+  );
+
+  assertEquals(
+    output,
+    left([
+      {
+        tag: "DuplicateDefinitionError",
+        location: mkCoordinate(69, 2, 36),
+        name: "X",
+      },
+    ]),
+  );
+});
+
 const names = (
   output: Either<Errors.Errors, Array<Types>>,
 ): Either<Errors.Errors, Array<Array<string>>> =>
@@ -491,9 +508,7 @@ const validNames = [
 
 // Futher scenarios:
 // - Negative:
-//   - invalid reference reference to a qualified module that does exist however the identifier does not
 //   - use name clash
-//   - use as name clash
 //   - name clash on imports
 
 const translate = async (
