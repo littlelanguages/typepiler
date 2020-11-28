@@ -1,12 +1,12 @@
-import * as Path from "https://deno.land/std@0.76.0/path/mod.ts";
+import { Either, isLeft, left, right } from "../deps/either.ts";
+import { combine } from "../deps/location.ts";
+import * as Path from "../deps/path.ts";
+import * as S from "../deps/set.ts";
 
 import * as AST from "./ast.ts";
 import * as TST from "../cfg/definition.ts";
-import { Either, isLeft, left, right } from "../data/either.ts";
-import * as S from "../data/set.ts";
 import * as Errors from "./errors.ts";
 import { parse } from "./parser.ts";
-import { combine } from "./location.ts";
 
 export const translateFiles = (
   srcNames: Array<string>,

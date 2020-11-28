@@ -1,4 +1,5 @@
-import { assertEquals } from "../testing/asserts.ts";
+import { assertEquals } from "../deps/asserts.ts";
+
 import {
   Declarations,
   Name,

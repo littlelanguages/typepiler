@@ -1,4 +1,7 @@
-import * as Path from "https://deno.land/std@0.76.0/path/mod.ts";
+import { assertEquals } from "../deps/asserts.ts";
+import { Either, left, right } from "../deps/either.ts";
+import { mkCoordinate, range } from "../deps/location.ts";
+import * as Path from "../deps/path.ts";
 
 import {
   builtinDeclarations,
@@ -10,14 +13,11 @@ import {
   Type,
   Types,
 } from "../cfg/definition.ts";
-import { Either, left, right } from "../data/either.ts";
 import * as Errors from "./errors.ts";
 import {
   translateContent as dynamicTranslate,
   translateFiles,
 } from "./dynamic.ts";
-import { mkCoordinate, range } from "./location.ts";
-import { assertEquals } from "../testing/asserts.ts";
 
 const SRC = "./parser/tests.llt";
 

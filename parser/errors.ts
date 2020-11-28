@@ -1,4 +1,5 @@
-import { Location } from "./location.ts";
+import { Location } from "../deps/location.ts";
+
 import type { SyntaxError } from "./typepiler-parser.ts";
 
 export type Errors = Array<ErrorItem>;

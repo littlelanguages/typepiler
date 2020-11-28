@@ -1,8 +1,9 @@
+import { Either } from "../deps/either.ts";
+import { combine } from "../deps/location.ts";
+
 import { Declaration, Declarations, Import, Name, Type } from "./ast.ts";
 import * as Parser from "./typepiler-parser.ts";
 import { Token } from "./typepiler-scanner.ts";
-import { combine } from "./location.ts";
-import { Either } from "../data/either.ts";
 import { Errors } from "./errors.ts";
 
 export const parse = (input: string): Either<Errors, Declarations> =>

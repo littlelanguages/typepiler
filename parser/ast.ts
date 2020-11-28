@@ -1,4 +1,4 @@
-import { combine, Location } from "./location.ts";
+import { combine, Location } from "../deps/location.ts";
 
 export type Declarations = {
   imports: Array<Import>;
