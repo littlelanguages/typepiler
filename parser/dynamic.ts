@@ -9,23 +9,17 @@ import { parse } from "./parser.ts";
 
 export const translateFiles = (
   srcNames: Array<string>,
-): Promise<Either<Errors.Errors, Array<TST.Types>>> => {
-  return Promise.all(
-    srcNames.map((srcName) => {
-      const resolvedSrcName = resolveSrcName(srcName);
-
-      return translate(
-        resolvedSrcName,
-        S.emptySet as Set<string>,
-      );
-    }),
+): Promise<Either<Errors.Errors, Array<TST.Types>>> =>
+  Promise.all(
+    srcNames.map(resolveSrcName).map((resolvedSrcName) =>
+      translate(resolvedSrcName, S.emptySet as Set<string>)
+    ),
   ).then((
     rs,
   ) => (rs.some(isLeft)
     ? left(rs.flatMap((r) => r.either((l) => l, (_) => [])))
     : right(mergeTypes(rs.flatMap((r) => r.either((_) => [], (r) => r)))))
   );
-};
 
 export const isSrcLoaded = (
   srcName: string,
@@ -87,54 +81,60 @@ export const translateContent = (
   );
 };
 
+type UseAlias = {
+  tag: "UseAlias";
+  bindings: Map<string, TST.Declaration>;
+};
+
 export const translateAST = (
   canonicalFileName: string,
   ast: AST.Declarations,
   loadedFileNames: Set<string>,
 ): Promise<Either<Errors.Errors, Array<TST.Types>>> => {
   const setElements = new Set<string>();
-  const declarationNames = new Set<string>(
-    [...TST.builtinDeclarations.map((d) => d.name)],
+  const declarationBindings = new Map<string, TST.Declaration | UseAlias>(
+    TST.builtinDeclarations.map((d) => [d.name, d]),
   );
   const errors: Errors.Errors = [];
   const declarations: TST.Declarations = [];
 
   const populateShellDeclaration = (d: AST.Declaration) => {
-    if (d.tag === "SetDeclaration") {
-      declarations.push(
-        {
-          tag: "SetDeclaration",
-          name: d.name.id,
-          elements: [],
-        },
-      );
-    } else if (d.tag === "UnionDeclaration" && d.elements.length === 1) {
-      declarations.push({
+    const addDeclaration = (declaration: TST.Declaration) => {
+      declarations.push(declaration);
+      declarationBindings.set(declaration.name, declaration);
+    };
+
+    const declaration: TST.Declaration = (d.tag === "SetDeclaration")
+      ? {
+        tag: "SetDeclaration",
+        name: d.name.id,
+        elements: [],
+      }
+      : (d.tag === "UnionDeclaration" && d.elements.length === 1)
+      ? {
         tag: "AliasDeclaration",
         name: d.name.id,
         type: typeShell,
-      });
-    } else if (d.tag === "UnionDeclaration") {
-      declarations.push({
+      }
+      : (d.tag === "UnionDeclaration")
+      ? {
         tag: "UnionDeclaration",
         name: d.name.id,
         elements: [],
-      });
-    } else if (d.tag === "SimpleComposite") {
-      declarations.push({
+      }
+      : (d.tag === "SimpleComposite")
+      ? {
         tag: "SimpleComposite",
         name: d.name.id,
         type: typeShell,
-      });
-    } else {
-      declarations.push({
+      }
+      : {
         tag: "RecordComposite",
         name: d.name.id,
         fields: [],
-      });
-    }
+      };
 
-    declarationNames.add(d.name.id);
+    addDeclaration(declaration);
   };
 
   const translateDeclaration = (d: AST.Declaration) => {
@@ -230,15 +230,11 @@ export const translateAST = (
   };
 
   const getDeclaration = (name: string): TST.Declaration | undefined => {
-    let declaration: TST.Declaration | undefined = TST.builtinDeclarations.find(
-      (d) => d.name === name,
-    );
+    const binding = declarationBindings.get(name);
 
-    if (declaration === undefined) {
-      declaration = declarations.find((d) => d.name === name);
-    }
-
-    return declaration;
+    return (binding === undefined || binding.tag === "UseAlias")
+      ? undefined
+      : binding;
   };
 
   const flattenUnionDeclaration = (d: AST.Declaration) => {
@@ -334,31 +330,60 @@ export const translateAST = (
     }
   };
 
-  const resolveImports = (): Promise<Either<Errors.Errors, Array<TST.Types>>> =>
-    Promise.all(
-      ast.imports.map((i) =>
-        translate(
-          relativeTo(
-            canonicalFileName,
-            i.source.value.slice(1, i.source.value.length - 1),
-          ),
-          loadedFileNames,
-        )
-      ),
-    ).then(
-      (
-        rs,
-      ) => (rs.some(isLeft)
-        ? left(rs.flatMap((r) => r.either((l) => l, (_) => [])))
-        : right(rs.flatMap((r) => r.either((_) => [], (r) => r)))),
-    );
-
-  const imports = resolveImports();
+  const imports: Promise<Either<Errors.Errors, Array<TST.Types>>> = Promise.all(
+    ast.imports.map((i) =>
+      translate(
+        relativeTo(
+          canonicalFileName,
+          i.source.value.slice(1, i.source.value.length - 1),
+        ),
+        loadedFileNames,
+      )
+    ),
+  ).then(
+    (
+      rs,
+    ) => (rs.some(isLeft)
+      ? left(rs.flatMap((r) => r.either((l) => l, (_) => [])))
+      : right(rs.flatMap((r) => r.either((_) => [], (r) => r)))),
+  );
 
   return imports.then((imports) => {
     return imports.either((e) => left(e), (i) => {
+      ast.imports.forEach((imp, idx) => {
+        if (imp.qualified === undefined) {
+          i[idx].declarations.forEach((d) => {
+            if (declarationBindings.has(d.name)) {
+              errors.push({
+                tag: "DuplicateDefinitionError",
+                location: imp.source.location,
+                name: d.name,
+              });
+            }
+            declarationBindings.set(d.name, d);
+          });
+        } else {
+          if (declarationBindings.has(imp.qualified.id)) {
+            errors.push({
+              tag: "DuplicateDefinitionError",
+              location: imp.qualified.location,
+              name: imp.qualified.id,
+            });
+          }
+          declarationBindings.set(
+            imp.qualified.id,
+            {
+              tag: "UseAlias",
+              bindings: new Map<string, TST.Declaration>(
+                i[idx].declarations.map((d) => [d.name, d]),
+              ),
+            },
+          );
+        }
+      });
+
       ast.declarations.forEach((d) => {
-        if (declarationNames.has(d.name.id)) {
+        if (declarationBindings.has(d.name.id)) {
           errors.push(
             {
               tag: "DuplicateDefinitionError",

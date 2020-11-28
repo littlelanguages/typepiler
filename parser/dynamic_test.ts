@@ -374,6 +374,19 @@ Deno.test("dynamic - use - multiple references", async () => {
   );
 });
 
+Deno.test("dynamic - use - unqualified reference to a use declaration", async () => {
+  const output = await dynamicTranslate(
+    "./parser/tests.llt",
+    'use "./scenarios/valid.llt";\nName :: ID;',
+    new Set<string>(),
+  );
+
+  assertEquals(
+    names(output),
+    right([["Name"], validNames]),
+  );
+});
+
 const names = (
   output: Either<Errors.Errors, Array<Types>>,
 ): Either<Errors.Errors, Array<Array<string>>> =>
@@ -404,6 +417,8 @@ const validNames = [
 //   - cycle between use files
 //   - invalid reference reference to a qualified module that does not exist
 //   - invalid reference reference to a qualified module that does exist however the identifier does not
+//   - use name clash
+//   - use as name clash
 
 const translate = async (
   content: string,
