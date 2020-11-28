@@ -45,11 +45,11 @@ const translate = (
       : Deno.readTextFile(resolvedFileName);
 
   if (loadedFileNames.has(resolvedFileName)) {
-    console.log(
-      `Cycle detected: ${[...loadedFileNames]} -- ${resolvedFileName}`,
-    );
-    // TODO: report module cycle
-    return Promise.resolve(left([]));
+    return Promise.resolve(left([{
+      tag: "UseCycleError",
+      name: fileName,
+      names: [...loadedFileNames],
+    }]));
   } else {
     return readContent().then((content) =>
       translateContent(

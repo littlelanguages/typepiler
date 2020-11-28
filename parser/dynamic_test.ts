@@ -1,3 +1,5 @@
+import * as Path from "https://deno.land/std@0.76.0/path/mod.ts";
+
 import {
   builtinDeclarations,
   Declaration,
@@ -400,6 +402,27 @@ Deno.test("dynamic - use - unqualified reference to a use declaration", async ()
   );
 });
 
+Deno.test("dynamic - use - cycle", async () => {
+  const output = await translate('use "./scenarios/cycleA.llt";');
+  const errors = output.either((es) => es, (_) => []);
+
+  assertEquals(errors.length, 1);
+  assertEquals(errors[0].tag, "UseCycleError");
+
+  assertEquals(
+    Path.basename((errors[0] as Errors.UseCycleError).name),
+    "cycleA.llt",
+  );
+  assertEquals(
+    (errors[0] as Errors.UseCycleError).names.map((n) => Path.basename(n)),
+    [
+      "cycleC.llt",
+      "cycleB.llt",
+      "cycleA.llt",
+    ],
+  );
+});
+
 Deno.test("dynamic - use - qualified reference to a use declaration", async () => {
   const output = await dynamicTranslate(
     "./parser/tests.llt",
@@ -435,15 +458,12 @@ const validNames = [
 ];
 
 // Futher scenarios:
-// - Positive:
-//   - incorporate src into each declaration
-//
 // - Negative:
-//   - cycle between use files
 //   - invalid reference reference to a qualified module that does not exist
 //   - invalid reference reference to a qualified module that does exist however the identifier does not
 //   - use name clash
 //   - use as name clash
+//   - name clash on imports
 
 const translate = async (
   content: string,

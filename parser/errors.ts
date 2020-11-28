@@ -8,6 +8,7 @@ export type ErrorItem =
   | DuplicateFieldNameError
   | DuplicateSetElementError
   | IncorrectTypeArityError
+  | UseCycleError
   | SyntaxError
   | TypeDefinitionFileDoesNotExistError
   | UnionDeclarationCyclicReferenceError
@@ -41,6 +42,12 @@ export type IncorrectTypeArityError = {
   name: string;
   expected: number;
   actual: number;
+};
+
+export type UseCycleError = {
+  tag: "UseCycleError";
+  name: string;
+  names: Array<string>;
 };
 
 export type TypeDefinitionFileDoesNotExistError = {
