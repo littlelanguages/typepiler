@@ -387,6 +387,19 @@ Deno.test("dynamic - use - unqualified reference to a use declaration", async ()
   );
 });
 
+Deno.test("dynamic - use - qualified reference to a use declaration", async () => {
+  const output = await dynamicTranslate(
+    "./parser/tests.llt",
+    'use "./scenarios/valid.llt" as D;\nName :: D.ID;',
+    new Set<string>(),
+  );
+
+  assertEquals(
+    names(output),
+    right([["Name"], validNames]),
+  );
+});
+
 const names = (
   output: Either<Errors.Errors, Array<Types>>,
 ): Either<Errors.Errors, Array<Array<string>>> =>
@@ -410,8 +423,8 @@ const validNames = [
 
 // Futher scenarios:
 // - Positive:
-//   - unqualified reference to a use declaration
 //   - qualified reference to a use declaration
+//   - incorporate src into each declaration
 //
 // - Negative:
 //   - cycle between use files

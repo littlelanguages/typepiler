@@ -164,7 +164,7 @@ export const translateAST = (
 
       d.elements.forEach((t) => {
         if (t.tag === "Reference") {
-          const declaration = getDeclaration(t.name.id);
+          const declaration = getDeclaration(t.name.id, t.qualifier?.id);
 
           if (declaration === undefined) {
             errors.push({
@@ -229,12 +229,23 @@ export const translateAST = (
     }
   };
 
-  const getDeclaration = (name: string): TST.Declaration | undefined => {
-    const binding = declarationBindings.get(name);
+  const getDeclaration = (
+    name: string,
+    qualified: string | undefined = undefined,
+  ): TST.Declaration | undefined => {
+    if (qualified === undefined) {
+      const binding = declarationBindings.get(name);
 
-    return (binding === undefined || binding.tag === "UseAlias")
-      ? undefined
-      : binding;
+      return (binding === undefined || binding.tag === "UseAlias")
+        ? undefined
+        : binding;
+    } else {
+      const useBinding = declarationBindings.get(qualified);
+
+      return (useBinding === undefined || useBinding.tag !== "UseAlias")
+        ? undefined
+        : useBinding.bindings.get(name);
+    }
   };
 
   const flattenUnionDeclaration = (d: AST.Declaration) => {
@@ -299,7 +310,7 @@ export const translateAST = (
     } else if (type.tag === "Parenthesis") {
       return translateType(type.type);
     } else {
-      const d = getDeclaration(type.name.id);
+      const d = getDeclaration(type.name.id, type.qualifier?.id);
 
       if (d === undefined) {
         errors.push({
