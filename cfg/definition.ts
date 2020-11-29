@@ -17,7 +17,7 @@ export type SetDeclaration = {
   tag: "SetDeclaration";
   src: string;
   name: string;
-  elements: Array<String>;
+  elements: Array<string>;
 };
 
 export type AliasDeclaration = {
@@ -45,7 +45,7 @@ export type RecordComposite = {
   tag: "RecordComposite";
   src: string;
   name: string;
-  fields: Array<[String, Type]>;
+  fields: Array<[string, Type]>;
 };
 
 export type InternalDeclaration = {
