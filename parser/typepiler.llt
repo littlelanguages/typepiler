@@ -1,7 +1,7 @@
 Declarations = Seq Declaration;
 
 Declaration = 
-  SetDeclaration | UnionDeclaration | SimpleComposite | RecordComposite;
+    SetDeclaration | UnionDeclaration | SimpleComposite | RecordComposite;
 
 SetDeclaration ::
     name: ID
