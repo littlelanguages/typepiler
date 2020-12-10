@@ -36,6 +36,7 @@ Deno.test("dynamic - duplicate declaration name error", async () => {
       {
         tag: "DuplicateDefinitionError",
         location: range(25, 2, 1, 31, 2, 7),
+        src: SRC,
         name: "Boolean",
       },
     ]),
@@ -67,6 +68,7 @@ Deno.test("dynamic - duplicate set element from same declaration", async () => {
       {
         tag: "DuplicateSetElementError",
         location: range(17, 1, 18, 20, 1, 21),
+        src: SRC,
         name: "True",
       },
     ]),
@@ -84,6 +86,7 @@ Deno.test("dynamic - duplicate set element from alternative declaration", async 
       {
         tag: "DuplicateSetElementError",
         location: range(37, 2, 13, 40, 2, 16),
+        src: SRC,
         name: "True",
       },
     ]),
@@ -123,6 +126,7 @@ Deno.test("dynamic - reference to unknown declaration", async () => {
       {
         tag: "UnknownDeclarationError",
         location: range(21, 1, 22, 24, 1, 25),
+        src: SRC,
         name: "Sets",
       },
     ]),
@@ -140,6 +144,7 @@ Deno.test("dynamic - validate number of type parameters", async () => {
       {
         tag: "IncorrectTypeArityError",
         location: range(5, 1, 6, 7, 1, 8),
+        src: SRC,
         name: "Seq",
         expected: 1,
         actual: 0,
@@ -147,6 +152,7 @@ Deno.test("dynamic - validate number of type parameters", async () => {
       {
         tag: "IncorrectTypeArityError",
         location: range(15, 2, 6, 17, 2, 8),
+        src: SRC,
         name: "Seq",
         expected: 1,
         actual: 2,
@@ -199,6 +205,7 @@ Deno.test("dynamic - record composite field names need to be unique", async () =
       {
         tag: "DuplicateFieldNameError",
         location: mkCoordinate(24, 1, 25),
+        src: SRC,
         name: "a",
       },
     ]),
@@ -254,6 +261,7 @@ Deno.test("dynamic - union declaration referencing unknown declaration", async (
       {
         tag: "UnknownDeclarationError",
         location: range(31, 1, 32, 47, 1, 48),
+        src: SRC,
         name: "UnionDeclarations",
       },
     ]),
@@ -272,6 +280,7 @@ Deno.test("dynamic - union declaration references internal declaration", async (
       {
         tag: "UnionDeclarationReferenceInteranlDeclarationError",
         location: range(31, 1, 32, 33, 1, 34),
+        src: SRC,
         name: "Declaration",
         reference: "U32",
       },
@@ -291,6 +300,7 @@ Deno.test("dynamic - union declaration references alias declaration", async () =
       {
         tag: "UnionDeclarationReferenceSetDeclarationError",
         location: range(31, 1, 32, 34, 1, 35),
+        src: SRC,
         name: "Declaration",
         reference: "Fred",
       },
@@ -310,10 +320,12 @@ Deno.test("dynamic - union declaration references compound type", async () => {
       {
         tag: "UnionDeclarationReferenceCompundTypeError",
         location: range(14, 1, 15, 29, 1, 30),
+        src: SRC,
       },
       {
         tag: "UnionDeclarationReferenceCompundTypeError",
         location: range(33, 1, 34, 67, 1, 68),
+        src: SRC,
       },
     ]),
   );
@@ -332,11 +344,13 @@ Deno.test("dynamic - union declaration has a cycle", async () => {
       {
         tag: "UnionDeclarationCyclicReferenceError",
         location: range(0, 1, 1, 10, 1, 11),
+        src: SRC,
         name: "Declaration",
       },
       {
         tag: "UnionDeclarationCyclicReferenceError",
         location: range(75, 3, 1, 90, 3, 16),
+        src: SRC,
         name: "UnionDeclaration",
       },
     ]),
@@ -445,6 +459,7 @@ Deno.test("dynamic - reference to qualified module that does not exist", async (
       {
         tag: "UnknownDeclarationError",
         location: range(7, 1, 8, 10, 1, 11),
+        src: SRC,
         name: "X.ID",
       },
     ]),
@@ -462,6 +477,7 @@ Deno.test("dynamic - reference to qualified module that does exist however the I
       {
         tag: "UnknownDeclarationError",
         location: range(42, 2, 9, 46, 2, 13),
+        src: SRC,
         name: "X.IDS",
       },
     ]),
@@ -479,6 +495,7 @@ Deno.test("dynamic - use as name clash", async () => {
       {
         tag: "DuplicateDefinitionError",
         location: mkCoordinate(69, 2, 36),
+        src: SRC,
         name: "X",
       },
     ]),
@@ -496,6 +513,7 @@ Deno.test("dynamic - use name reference clash", async () => {
       {
         tag: "DuplicateDefinitionError",
         location: range(36, 2, 5, 61, 2, 30),
+        src: SRC,
         name: "ValidRef",
       },
     ]),

@@ -153,6 +153,7 @@ export const translateAST = (
             {
               tag: "DuplicateSetElementError",
               location: n.location,
+              src: canonicalFileName,
               name: n.id,
             },
           );
@@ -183,12 +184,14 @@ export const translateAST = (
             errors.push({
               tag: "UnknownDeclarationError",
               location,
+              src: canonicalFileName,
               name,
             });
           } else if (declaration.tag === "InternalDeclaration") {
             errors.push({
               tag: "UnionDeclarationReferenceInteranlDeclarationError",
               location,
+              src: canonicalFileName,
               name: d.name.id,
               reference: name,
             });
@@ -196,6 +199,7 @@ export const translateAST = (
             errors.push({
               tag: "UnionDeclarationReferenceAliasDeclarationError",
               location,
+              src: canonicalFileName,
               name: d.name.id,
               reference: name,
             });
@@ -203,6 +207,7 @@ export const translateAST = (
             errors.push({
               tag: "UnionDeclarationReferenceSetDeclarationError",
               location,
+              src: canonicalFileName,
               name: d.name.id,
               reference: name,
             });
@@ -213,6 +218,7 @@ export const translateAST = (
           errors.push({
             tag: "UnionDeclarationReferenceCompundTypeError",
             location: AST.typeLocation(t),
+            src: canonicalFileName,
           });
         }
       });
@@ -229,6 +235,7 @@ export const translateAST = (
             {
               tag: "DuplicateFieldNameError",
               location: n.location,
+              src: canonicalFileName,
               name: n.id,
             },
           );
@@ -310,6 +317,7 @@ export const translateAST = (
           {
             tag: "UnionDeclarationCyclicReferenceError",
             location: d.name.location,
+            src: canonicalFileName,
             name: e,
           },
         );
@@ -331,6 +339,7 @@ export const translateAST = (
           location: type.qualifier === undefined
             ? type.name.location
             : combine(type.qualifier.location, type.name.location),
+          src: canonicalFileName,
           name: type.qualifier === undefined
             ? type.name.id
             : `${type.qualifier.id}.${type.name.id}`,
@@ -342,6 +351,7 @@ export const translateAST = (
         errors.push({
           tag: "IncorrectTypeArityError",
           location: type.name.location,
+          src: canonicalFileName,
           name: type.name.id,
           expected: d.arity,
           actual: type.parameters.length,
@@ -386,6 +396,7 @@ export const translateAST = (
               errors.push({
                 tag: "DuplicateDefinitionError",
                 location: imp.source.location,
+                src: canonicalFileName,
                 name: d.name,
               });
             }
@@ -396,6 +407,7 @@ export const translateAST = (
             errors.push({
               tag: "DuplicateDefinitionError",
               location: imp.qualified.location,
+              src: canonicalFileName,
               name: imp.qualified.id,
             });
           }
@@ -417,6 +429,7 @@ export const translateAST = (
             {
               tag: "DuplicateDefinitionError",
               location: d.name.location,
+              src: canonicalFileName,
               name: d.name.id,
             },
           );

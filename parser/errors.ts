@@ -22,24 +22,28 @@ export type ErrorItem =
 export type DuplicateDefinitionError = {
   tag: "DuplicateDefinitionError";
   location: Location;
+  src: string;
   name: string;
 };
 
 export type DuplicateFieldNameError = {
   tag: "DuplicateFieldNameError";
   location: Location;
+  src: string;
   name: string;
 };
 
 export type DuplicateSetElementError = {
   tag: "DuplicateSetElementError";
   location: Location;
+  src: string;
   name: string;
 };
 
 export type IncorrectTypeArityError = {
   tag: "IncorrectTypeArityError";
   location: Location;
+  src: string;
   name: string;
   expected: number;
   actual: number;
@@ -59,12 +63,14 @@ export type TypeDefinitionFileDoesNotExistError = {
 export type UnionDeclarationCyclicReferenceError = {
   tag: "UnionDeclarationCyclicReferenceError";
   location: Location;
+  src: string;
   name: string;
 };
 
 export type UnionDeclarationReferenceAliasDeclarationError = {
   tag: "UnionDeclarationReferenceAliasDeclarationError";
   location: Location;
+  src: string;
   name: string;
   reference: string;
 };
@@ -72,11 +78,13 @@ export type UnionDeclarationReferenceAliasDeclarationError = {
 export type UnionDeclarationReferenceCompundTypeError = {
   tag: "UnionDeclarationReferenceCompundTypeError";
   location: Location;
+  src: string;
 };
 
 export type UnionDeclarationReferenceInteranlDeclarationError = {
   tag: "UnionDeclarationReferenceInteranlDeclarationError";
   location: Location;
+  src: string;
   name: string;
   reference: string;
 };
@@ -84,6 +92,7 @@ export type UnionDeclarationReferenceInteranlDeclarationError = {
 export type UnionDeclarationReferenceSetDeclarationError = {
   tag: "UnionDeclarationReferenceSetDeclarationError";
   location: Location;
+  src: string;
   name: string;
   reference: string;
 };
@@ -91,5 +100,6 @@ export type UnionDeclarationReferenceSetDeclarationError = {
 export type UnknownDeclarationError = {
   tag: "UnknownDeclarationError";
   location: Location;
+  src: string;
   name: string;
 };
