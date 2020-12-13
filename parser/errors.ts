@@ -14,7 +14,7 @@ export type ErrorItem =
   | TypeDefinitionFileDoesNotExistError
   | UnionDeclarationCyclicReferenceError
   | UnionDeclarationReferenceAliasDeclarationError
-  | UnionDeclarationReferenceCompundTypeError
+  | UnionDeclarationReferenceCompoundTypeError
   | UnionDeclarationReferenceInteranlDeclarationError
   | UnionDeclarationReferenceSetDeclarationError
   | UnknownDeclarationError;
@@ -75,8 +75,8 @@ export type UnionDeclarationReferenceAliasDeclarationError = {
   reference: string;
 };
 
-export type UnionDeclarationReferenceCompundTypeError = {
-  tag: "UnionDeclarationReferenceCompundTypeError";
+export type UnionDeclarationReferenceCompoundTypeError = {
+  tag: "UnionDeclarationReferenceCompoundTypeError";
   location: Location;
   src: string;
 };

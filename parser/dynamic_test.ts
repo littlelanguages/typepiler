@@ -318,12 +318,12 @@ Deno.test("dynamic - union declaration references compound type", async () => {
     output,
     left([
       {
-        tag: "UnionDeclarationReferenceCompundTypeError",
+        tag: "UnionDeclarationReferenceCompoundTypeError",
         location: range(14, 1, 15, 29, 1, 30),
         src: SRC,
       },
       {
-        tag: "UnionDeclarationReferenceCompundTypeError",
+        tag: "UnionDeclarationReferenceCompoundTypeError",
         location: range(33, 1, 34, 67, 1, 68),
         src: SRC,
       },

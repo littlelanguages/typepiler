@@ -216,7 +216,7 @@ export const translateAST = (
           }
         } else {
           errors.push({
-            tag: "UnionDeclarationReferenceCompundTypeError",
+            tag: "UnionDeclarationReferenceCompoundTypeError",
             location: AST.typeLocation(t),
             src: canonicalFileName,
           });
