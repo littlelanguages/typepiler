@@ -1,6 +1,63 @@
 # typepiler
 A parser and type checker for a type compiler.
 
+The type syntax is based on the early versions of VDM which has been more recently adopoted into TypeScript.  The following grammar describes the syntax of these definitions.
+
+```
+uses "./typepiler.llld";
+
+Declarations: {Import} {Declaration};
+
+Import: "use" LiteralString ["as" UpperID] ";";
+
+Declaration: UpperID ("=" Alias | "::" Composite) ";";
+
+Alias
+  : Type {"|" Type}
+  | "{" UpperID {"," UpperID} "}"
+  ;
+
+Composite
+  : Type
+  | {LowerID ":" Type}
+  ;
+
+Type: TypeTerm {"*" TypeTerm};
+
+TypeTerm
+  : UpperID ["." UpperID] {TypeFactor}
+  | "(" Type ")"
+  ;
+
+TypeFactor
+  : UpperID ["." UpperID]
+  | "(" Type ")"
+  ;
+```
+
+This definition refers to the following lexical definition.
+
+```
+tokens
+    LowerID = lowerAlpha {alpha | digit};
+    UpperID = upperAlpha {alpha | digit};
+    LiteralString = '"' {!'"'} '"';
+
+comments
+    "/*" to "*/" nested;
+    "//" {!cr};
+
+whitespace
+    chr(0)-' ';
+
+fragments
+    digit = '0'-'9';
+    lowerAlpha = 'a' - 'z';
+    upperAlpha = 'A'-'Z';
+    alpha = lowerAlpha + upperAlpha;
+    cr = chr(10);
+```
+
 ## Example
 
 ```
@@ -92,19 +149,19 @@ LiteralValue =
 
 LiteralBool ::
   location: Location
-  value: B;
+  value: Bool;
 
 LiteralInt ::
   location: Location
-  value: S;
+  value: String;
 
 LiteralFloat ::
   location: Location
-  value: S;
+  value: String;
 
 LiteralString ::
   location: Location
-  value: S;
+  value: String;
 
 LiteralUnaryValue ::
   location: Location
@@ -120,5 +177,22 @@ UnaryOp =
 
 Identifier ::
   location: Location
-  name: S;
+  name: String;
 ```
+## Building Source
+
+The directory `~/.devcontainer` contains a Dockerfile used by [Visual Studio Code](https://code.visualstudio.com) to issolate the editor and build tools from being installed on the developer's workstation.
+
+The Dockerfile is straightforward with the interesting piece being [entr](https://github.com/eradman/entr/) which is used by the `etl.sh` to run `test.sh` whenever a source file has changed.
+
+## Scripts
+
+Two script can be found inside `~/.bin`
+
+| Name   | Purpose |
+|--------|----------------------------------|
+| build.sh | Builds the scanner and parser in the event that the lexical ([./parser/typepiler.llld](./parser/typepiler.llld)) and syntactic ([./parser/typepiler.llgd](./parser/typepiler.llgd)) definitions have been changed. |
+| etl.sh | Runs an edit-test-loop - loops indefinately running all of the tests whenever a source file has changed. |
+| test.sh | Runs lint on the source code and executes the automated tests. |
+
+These scripts must be run out of the project's root directory which, when using [Visual Studio Code](https://code.visualstudio.com), is done using a shell inside the container.
